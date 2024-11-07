@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -8,6 +9,10 @@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.HomeWork" Color="Color.Warning" OnClick="NavigateToEmirateBO"></MudIconButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Spa" Color="Color.Info" OnClick="NavigateToEmirateSPA"></MudIconButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Success" OnClick="NavigateToTycheros"></MudIconButton>
         <MudSpacer />
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
@@ -99,6 +104,14 @@
         true => Icons.Material.Rounded.AutoMode,
         false => Icons.Material.Outlined.DarkMode,
     };
+
+    private async Task NavigateToTycheros() { await JSRuntime.InvokeVoidAsync("openInNewTab", "https://www.tycheros.net"); }
+    private async Task NavigateToEmirateSPA() { await JSRuntime.InvokeVoidAsync("openInNewTab", "https://emiratesdraw.com/"); }
+    private async Task NavigateToEmirateBO() { await JSRuntime.InvokeVoidAsync("openInNewTab", "https://backoffice.emiratesdraw.com"); }
 }
-
-
+<script>
+    window.openInNewTab = function (url) {
+        var win = window.open(url, '_blank');
+        win.focus();
+    }
+</script>

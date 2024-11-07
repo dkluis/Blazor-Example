@@ -12,6 +12,8 @@ builder.Services.AddDbContext<TycherosmonitoringContext>(options =>
                             options.UseMySql(builder.Configuration.GetConnectionString("TycherosMonitoring"),
                                     new MySqlServerVersion(new Version(11, 5, 2))));    // Add MariaDB
 builder.Services.AddScoped<TycherosMonitoringService>();                                // Register the database service
+builder.Services.AddHttpClient<ApiService>();                                           // Register HTTP client
+builder.Services.AddHostedService<PeriodicApiService>();                                // Register the background service
 
 var app = builder.Build();
 

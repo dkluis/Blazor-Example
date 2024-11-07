@@ -1,0 +1,44 @@
+@page "/fetchdata"
+
+@using _4LL_Monitoring.Models
+@using _4LL_Monitoring.Services
+
+@inject TycherosMonitoringService MonitoringService
+
+<h3>Fetch Data</h3>
+
+@if (CollectedData == null)
+{
+<p><em>Loading...</em></p>
+}
+else
+{
+<table class="table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Created</th>
+        <th>ApiName</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var entity in CollectedData)
+    {
+    <tr>
+        <td>@entity.Id</td>
+        <td>@entity.Created</td>
+        <td>@entity.ApiName</td>
+    </tr>
+    }
+    </tbody>
+</table>
+}
+
+@code {
+private List<Collectedapidatum> CollectedData;
+
+protected override async Task OnInitializedAsync()
+{
+CollectedData = await MonitoringService.GetAllEntitiesAsync();
+}
+}

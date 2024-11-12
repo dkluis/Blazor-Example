@@ -1,48 +1,72 @@
 ﻿using _4LL_Monitoring.Models;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace _4LL_Monitoring.Services;
 
 public class TycherosMonitoringService
 {
-    private readonly TycherosmonitoringContext _context;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public TycherosMonitoringService(TycherosmonitoringContext context)
+    public TycherosMonitoringService(IServiceScopeFactory scopeFactory)
     {
-        _context = context;
+        _scopeFactory = scopeFactory;
     }
 
     #region CollectedApiDatum
 
-    public async Task<List<Collectedapidatum?>> GetAllEntitiesAsync()
+    public async Task<List<Collectedapidatum>> GetAllEntitiesAsync()
     {
-        return await _context.Collectedapidata.ToListAsync();
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            var response = await context.Collectedapidata.ToListAsync();
+            if (response is null)
+            {
+                return new List<Collectedapidatum>();
+            }
+            return response!;
+        }
+        catch (MySqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number} , Message: {e.Message}");
+            throw;
+        }
     }
 
     public async Task<Collectedapidatum?> GetEntityByIdAsync(int id)
     {
-        return await _context.Collectedapidata.FindAsync(id);
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        return await context.Collectedapidata.FindAsync(id);
     }
 
     public async Task AddEntityAsync(Collectedapidatum? entity)
     {
-        _context.Collectedapidata.Add(entity);
-        await _context.SaveChangesAsync();
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        context.Collectedapidata.Add(entity);
+        await context.SaveChangesAsync();
     }
 
     public async Task UpdateEntityAsync(Collectedapidatum entity)
     {
-        _context.Entry(entity).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        context.Entry(entity).State = EntityState.Modified;
+        await context.SaveChangesAsync();
     }
 
     public async Task DeleteEntityAsync(int id)
     {
-        var entity = await _context.Collectedapidata.FindAsync(id);
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var entity = await context.Collectedapidata.FindAsync(id);
         if (entity != null)
         {
-            _context.Collectedapidata.Remove(entity);
-            await _context.SaveChangesAsync();
+            context.Collectedapidata.Remove(entity);
+            await context.SaveChangesAsync();
         }
     }
 

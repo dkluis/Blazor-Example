@@ -1,24 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Scaffolding.Internal;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace _4LL_Monitoring.Models;
 
-public partial class TycherosmonitoringContext : DbContext
+public class TycherosmonitoringContext : DbContext
 {
-    public TycherosmonitoringContext()
-    {
-    }
+    /*private readonly IConfiguration _configuration;
 
+    public TycherosmonitoringContext(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connectionString = _configuration.GetConnectionString("TycherosMonitoring");
+            optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(11, 5, 2)));
+        }
+    }
+    
+    // Rest of the code remains unchanged
     public TycherosmonitoringContext(DbContextOptions<TycherosmonitoringContext> options)
         : base(options)
     {
     }
 
-    public virtual DbSet<Collectedapidatum> Collectedapidata { get; set; }
+    public virtual DbSet<Collectedapidatum> Collectedapidata { get; set; }*/
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public TycherosmonitoringContext(DbContextOptions<TycherosmonitoringContext> options)
+                : base(options)
+        {
+        }
+
+        // DbSets and other configurations
+        public virtual DbSet<Collectedapidatum> Collectedapidata { get; set; }
+}
+
+    /*protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
             .UseCollation("utf8mb4_uca1400_ai_ci")
@@ -64,5 +83,4 @@ public partial class TycherosmonitoringContext : DbContext
         OnModelCreatingPartial(modelBuilder);
     }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-}
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);*/

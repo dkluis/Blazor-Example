@@ -1,6 +1,6 @@
 ﻿using _4LL_Monitoring.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 
 namespace _4LL_Monitoring.Services;
 
@@ -28,7 +28,7 @@ public class TycherosMonitoringService
             }
             return response!;
         }
-        catch (MySqlException e)
+        catch (SqlException e)
         {
             Console.WriteLine($"Number: {e.Number} , Message: {e.Message}");
             throw;
@@ -42,7 +42,7 @@ public class TycherosMonitoringService
         return await context.Collectedapidata.FindAsync(id);
     }
 
-    public async Task AddEntityAsync(Collectedapidatum? entity)
+    public async Task AddColletedApiDataAsync(Collectedapidatum entity)
     {
         using var scope = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();

@@ -1,37 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace _4LL_Monitoring.Models;
 
-public partial class Collectedapidatum
+public class Collectedapidatum
 {
+    [Key]
     public int Id { get; set; }
 
     public int HttpStatusCode { get; set; }
 
-    public DateTime Created { get; set; }
+    [Required]
+    public DateTime Created { get; set; } = DateTime.UtcNow;
 
-    public string ApiName { get; set; } = null!;
+    [Required]
+    [MaxLength(255)]
+    public string? ApiName { get; set; }
 
-    public string Type { get; set; } = null!;
+    [Required]
+    [MaxLength(20)]
+    public string Type { get; set; }
 
     public int? Threshold { get; set; }
 
     public int? Value { get; set; }
 
+    [MaxLength(255)]
     public string? Status { get; set; }
 
-    public DateOnly? Date { get; set; }
+    // Computed columns
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime Date { get; private set; }
 
-    public int? Year { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public int Year { get; private set; }
 
-    public int? Month { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public int Month { get; private set; }
 
-    public int? Day { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public int Day { get; private set; }
 
-    public int? Hour { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public int Hour { get; private set; }
 
-    public int? Minute { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public int Minute { get; private set; }
 
     public string? Note { get; set; }
 

@@ -6,14 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMudServices();                                                      // Add MudBlazor services
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();                 // Add services to the container.
+builder.Services.AddMudServices();                                                              // Add MudBlazor services
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();                         // Add services to the container.
 builder.Services.AddDbContext<TycherosmonitoringContext>(options =>
-                            options.UseMySql(builder.Configuration.GetConnectionString("TycherosMonitoring"),
-                                    new MySqlServerVersion(new Version(11, 5, 2))));    // Add MariaDB
-builder.Services.AddScoped<TycherosMonitoringService>();                                // Register the database service
-builder.Services.AddHttpClient<ApiService>();                                           // Register HTTP client
-builder.Services.AddHostedService<PeriodicApiService>();                                // Register the background service
+        options.UseSqlServer(builder.Configuration.GetConnectionString("TycherosMonitoring"))); // Add MS SqlServer
+builder.Services.AddScoped<TycherosMonitoringService>();                                        // Register the database service
+builder.Services.AddHttpClient<ApiService>();                                                   // Register HTTP client
+builder.Services.AddHostedService<PeriodicApiService>();                                        // Register the background service
 
 var app = builder.Build();
 

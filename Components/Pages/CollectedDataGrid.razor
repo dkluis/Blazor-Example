@@ -5,6 +5,8 @@
 
 <MudText Typo="Typo.h3">Api DataGrid Example</MudText>
 
+<MudButton Color="Color.Info" OnClick="ToggleSummaryOnly">Toggle Data Grid</MudButton>
+
 <MudDataGrid T="Collectedapidatum"
              Items="@_statuses" SortMode="SortMode.Multiple"
              Filterable="true" QuickFilter="@QuickFilter"
@@ -12,6 +14,7 @@
              RowContextMenuClick="RowRightClicked"
              SelectedItemsChanged="@SelectedItemsChanged"
              MultiSelection="false"
+             RowsPerPage="20"
              >
     <ToolBarContent>
         <MudText Typo="Typo.h6">Api Result Data Grid</MudText>
@@ -20,7 +23,7 @@
             AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>*@
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="Collectedapidatum" />
+        <SelectColumn T="Collectedapidatum"/>
         <PropertyColumn Property="x => x.Id" Title="Id" Sortable="false" Filterable="false" Hidden="true" />
         <PropertyColumn Property="x => x.ApiName" Title="Api" />
         <PropertyColumn Property="x => x.Type" Title="Type" />
@@ -28,17 +31,25 @@
         <PropertyColumn Property="x => x.Value" Title="Value" />
         <PropertyColumn Property="x => x.Status" Title="Status" />
         <PropertyColumn Property="x => x.HttpStatusCode" Title="Http Status" />
-        @*<PropertyColumn Property="x => x.Created" Title="Date Time" />*@
-        <PropertyColumn Property="x => x.Date" Title="Date" />
-        <PropertyColumn Property="x => x.Year" Title="Year" />
-        <PropertyColumn Property="x => x.Month" Title="Month" />
-        <PropertyColumn Property="x => x.Day" Title="Day" />
-        <PropertyColumn Property="x => x.Hour" Title="Hour" />
-        <PropertyColumn Property="x => x.Minute" Title="Min" />
+        @if (_showSummaryOnly)
+        {
+            <PropertyColumn Property="x => x.Created" Title="Date Time" Hideable="true"/>
+        }
+        @if (!_showSummaryOnly)
+        {
+            <PropertyColumn Property="x => x.Date" Title="Date" format="yyyy-MM-dd"/>
+            <PropertyColumn Property="x => x.Year" Title="Year"/>
+            <PropertyColumn Property="x => x.Month" Title="Month"/>
+            <PropertyColumn Property="x => x.Day" Title="Day"/>
+            <PropertyColumn Property="x => x.Hour" Title="Hour"/>
+            <PropertyColumn Property="x => x.Minute" Title="Min"/>
+        }
         <PropertyColumn Property="x => x.Note" Title="Notes" />
         <PropertyColumn Property="x => x.ErrorDetails" Title="Errors" />
-        <PropertyColumn Property="x => x.JsonResponse" Title="Raw Response" Filterable="false" Sortable="false"/>
-
+        @if (!_showSummaryOnly)
+        {
+            <PropertyColumn Property="x => x.JsonResponse" Title="Raw Response" Hideable="true"/>
+        }
     </Columns>
     <PagerContent>
         <MudDataGridPager T="Collectedapidatum" />
@@ -65,6 +76,12 @@
     private List<Collectedapidatum> _statuses = new List<Collectedapidatum>();
     private string _searchString = string.Empty;
     private List<string> _events = new();
+    private bool _showSummaryOnly;
+
+    private void ToggleSummaryOnly()
+    {
+        _showSummaryOnly = !_showSummaryOnly;
+    }
 
     // quick filter - filter globally across multiple columns with the same input
     private Func<Collectedapidatum, bool> QuickFilter => x =>

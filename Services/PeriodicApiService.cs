@@ -59,8 +59,6 @@ public class PeriodicApiService : BackgroundService
                 ErrorDetails = null,
                 ElapsedMilliseconds = elapsed,
             };
-            // using var scope = _serviceProvider.CreateScope();
-            // var dbService = scope.ServiceProvider.GetRequiredService<TycherosMonitoringService>();
             await dbService.AddColletedApiDataAsync(regRec);
 
             apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckLogins";
@@ -81,8 +79,6 @@ public class PeriodicApiService : BackgroundService
                 ErrorDetails = null,
                 ElapsedMilliseconds = elapsed,
             };
-            // using var scope = _serviceProvider.CreateScope();
-            // var dbService = scope.ServiceProvider.GetRequiredService<TycherosMonitoringService>();
             await dbService.AddColletedApiDataAsync(loginRec);
 
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);

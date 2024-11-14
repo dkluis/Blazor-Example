@@ -15,23 +15,23 @@
              SelectedItemsChanged="@SelectedItemsChanged"
              MultiSelection="false"
              RowsPerPage="20"
-             >
+>
     <ToolBarContent>
         <MudText Typo="Typo.h4">Api Monitoring Data Grid</MudText>
-        <MudSpacer />
+        <MudSpacer/>
         @*<MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
             AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>*@
     </ToolBarContent>
     <Columns>
         <SelectColumn T="Collectedapidatum"/>
-        <PropertyColumn Property="x => x.Id" Title="Id" Sortable="false" Filterable="false" Hidden="true" />
-        <PropertyColumn Property="x => x.ApiName" Title="Api Name" />
-        <PropertyColumn Property="x => x.Type" Title="Api Type" />
-        <PropertyColumn Property="x => x.Threshold" Title="Threshold" />
-        <PropertyColumn Property="x => x.Value" Title="Value" />
-        <PropertyColumn Property="x => x.Status" Title="Api Status" />
-        <PropertyColumn Property="x => x.HttpStatusCode" Title="Http Status" />
-        <PropertyColumn Property="x => x.ElapsedMilliseconds" Title="Http Time" />
+        <PropertyColumn Property="x => x.Id" Title="Id" Sortable="false" Filterable="false" Hidden="true"/>
+        <PropertyColumn Property="x => x.ApiName" Title="Api Name"/>
+        <PropertyColumn Property="x => x.Type" Title="Api Type"/>
+        <PropertyColumn Property="x => x.Threshold" Title="Threshold"/>
+        <PropertyColumn Property="x => x.Value" Title="Value"/>
+        <PropertyColumn Property="x => x.Status" Title="Api Status"/>
+        <PropertyColumn Property="x => x.HttpStatusCode" Title="Http Status"/>
+        <PropertyColumn Property="x => x.ElapsedMilliseconds" Title="Http Time"/>
         @if (_showSummaryOnly)
         {
             <PropertyColumn Property="x => x.Created" Title="Date Time" Hideable="true"/>
@@ -45,15 +45,15 @@
             <PropertyColumn Property="x => x.Hour" Title="Hour"/>
             <PropertyColumn Property="x => x.Minute" Title="Min"/>
         }
-        <PropertyColumn Property="x => x.Note" Title="Notes" />
-        <PropertyColumn Property="x => x.ErrorDetails" Title="Errors" />
+        <PropertyColumn Property="x => x.Note" Title="Notes"/>
+        <PropertyColumn Property="x => x.ErrorDetails" Title="Errors"/>
         @if (!_showSummaryOnly)
         {
             <PropertyColumn Property="x => x.JsonResponse" Title="Raw Response" Hideable="true"/>
         }
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="Collectedapidatum" />
+        <MudDataGridPager T="Collectedapidatum"/>
     </PagerContent>
 </MudDataGrid>
 
@@ -63,18 +63,20 @@
         {
             <MudText Typo="@Typo.body2">@message</MudText>
         }
-        @if(_events.Count > 0)
+        @if (_events.Count > 0)
         {
             <div class="d-flex">
                 <MudSpacer/>
-                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="@(() => _events.Clear())">Clear</MudButton>
+                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="@(() => _events.Clear())">
+                    Clear
+                </MudButton>
             </div>
         }
     </MudExpansionPanel>
 </MudExpansionPanels>
 
 @code {
-    private List<Collectedapidatum> _statuses = new List<Collectedapidatum>();
+    private List<Collectedapidatum> _statuses = new();
     private string _searchString = string.Empty;
     private List<string> _events = new();
     private bool _showSummaryOnly;
@@ -87,41 +89,27 @@
     }
 
     // quick filter - filter globally across multiple columns with the same input
-    private Func<Collectedapidatum, bool> QuickFilter => x =>
-    {
-        if (string.IsNullOrWhiteSpace(_searchString))
-            return true;
+    private Func<Collectedapidatum, bool> QuickFilter
+        => x =>
+           {
+               if (string.IsNullOrWhiteSpace(_searchString))
+                   return true;
 
-        if (x.ApiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+               if (x.ApiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                   return true;
 
-        if (x.Status.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+               if (x.Status.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                   return true;
 
-        if ($"{x.Value} {x.Threshold} ".Contains(_searchString))
-            return true;
+               if ($"{x.Value} {x.Threshold} ".Contains(_searchString))
+                   return true;
 
-        return false;
-    };
-
-    protected override async Task OnInitializedAsync()
-    {
-        _statuses = await Service.GetAllEntitiesAsync();
-    }
+               return false;
+           };
+    protected override async Task OnInitializedAsync() { _statuses = await Service.GetAllEntitiesAsync(); }
 
     // events
-    void RowClicked(DataGridRowClickEventArgs<Collectedapidatum> args)
-    {
-        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void RowRightClicked(DataGridRowClickEventArgs<Collectedapidatum> args)
-    {
-        _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void SelectedItemsChanged(HashSet<Collectedapidatum> items)
-    {
-        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
-    }
+    void RowClicked(DataGridRowClickEventArgs<Collectedapidatum> args) { _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void RowRightClicked(DataGridRowClickEventArgs<Collectedapidatum> args) { _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void SelectedItemsChanged(HashSet<Collectedapidatum> items) { _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}"); }
 }

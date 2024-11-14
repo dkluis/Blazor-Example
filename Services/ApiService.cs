@@ -1,35 +1,30 @@
 ﻿using System.Diagnostics;
 using System.Net;
 
-namespace _4LL_Monitoring.Services
+namespace _4LL_Monitoring.Services;
+
+public class ApiService
 {
-    public class ApiService
+    private readonly HttpClient _httpClient;
+    public ApiService(HttpClient httpClient) { _httpClient = httpClient; }
+
+    public async Task<(HttpStatusCode, long, string)> GetApiResultAsync(string apiUrl)
     {
-        private readonly HttpClient _httpClient;
-
-        public ApiService(HttpClient httpClient)
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        try
         {
-            _httpClient = httpClient;
+            var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadAsStringAsync();
+            stopwatch.Stop();
+            var elapsed = stopwatch.ElapsedMilliseconds;
+            return (response.StatusCode, elapsed, result ?? "API result is null");
         }
-
-        public async Task<(HttpStatusCode, long, string)> GetApiResultAsync(string apiUrl)
+        catch (Exception ex)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            try
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-                var response = await _httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
-                var result = await response.Content.ReadAsStringAsync();
-                stopwatch.Stop();
-                var elapsed = stopwatch.ElapsedMilliseconds;
-                return (response.StatusCode, elapsed, result ?? "API result is null");
-            }
-            catch (Exception ex)
-            {
-                return (HttpStatusCode.InternalServerError, 0, "An error occurred while fetching the API result");
-            }
+            return (HttpStatusCode.InternalServerError, 0, "An error occurred while fetching the API result");
         }
     }
 }

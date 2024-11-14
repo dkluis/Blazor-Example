@@ -7,11 +7,7 @@ namespace _4LL_Monitoring.Services;
 public class TycherosMonitoringService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-
-    public TycherosMonitoringService(IServiceScopeFactory scopeFactory)
-    {
-        _scopeFactory = scopeFactory;
-    }
+    public TycherosMonitoringService(IServiceScopeFactory scopeFactory) { _scopeFactory = scopeFactory; }
 
     #region CollectedApiDatum
 
@@ -50,8 +46,9 @@ public class TycherosMonitoringService
         try
         {
             var response = await context.Collectedapidata.Where(x => x.Value.HasValue)
-                                        .GroupBy(x => new { x.ApiName, x.Date.Date, x.Hour })
-                                        .Select(g => new AverageHourlyApiResult
+                                        .GroupBy(x => new {x.ApiName, x.Date.Date, x.Hour})
+                                        .Select(
+                                                 g => new AverageHourlyApiResult
                                                  {
                                                      ApiName = g.Key.ApiName!,
                                                      Date = g.Key.Date.Date,

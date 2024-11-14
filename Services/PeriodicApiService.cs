@@ -86,7 +86,6 @@ public class PeriodicApiService : BackgroundService
     }
 
     public override async Task StopAsync(CancellationToken stoppingToken) { await base.StopAsync(stoppingToken); }
-
     public class CheckOrdersDto
     {
         public string ApiName { get; set; } = "CheckOrders";
@@ -98,7 +97,6 @@ public class PeriodicApiService : BackgroundService
         [JsonPropertyName("status")]
         public string? Status { get; set; }
     }
-
     public class CheckLoginsDto
     {
         public string ApiName { get; set; } = "CheckLogins";
@@ -110,7 +108,6 @@ public class PeriodicApiService : BackgroundService
         [JsonPropertyName("status")]
         public string? Status { get; set; }
     }
-
     public class CheckRegistrationsDto
     {
         public string ApiName { get; set; } = "CheckRegistrations";
@@ -123,13 +120,13 @@ public class PeriodicApiService : BackgroundService
         public string? Status { get; set; }
     }
 
-        public static T ConvertJsonToData<T>(string json) where T : class
+    public static T ConvertJsonToData<T>(string json) where T : class
+    {
+        var apiDataDto = JsonSerializer.Deserialize<T>(json);
+        if (apiDataDto == null)
         {
-            var apiDataDto = JsonSerializer.Deserialize<T>(json);
-            if (apiDataDto == null)
-            {
-                throw new ArgumentException("Invalid JSON data");
-            }
-            return apiDataDto;
+            throw new ArgumentException("Invalid JSON data");
         }
+        return apiDataDto;
+    }
 }

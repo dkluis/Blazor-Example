@@ -20,7 +20,7 @@ public class PeriodicApiService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             var apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckOrders";
-            var (status, result) = await _apiService.GetApiResultAsync(apiUrl);
+            var (status, elapsed, result) = await _apiService.GetApiResultAsync(apiUrl);
 
             var ordersDto = ConvertJsonToData<CheckOrdersDto>(result);
             var orderRec = new Collectedapidatum
@@ -35,13 +35,14 @@ public class PeriodicApiService : BackgroundService
                 Note = "Timespan 1 hour",
                 JsonResponse = result,
                 ErrorDetails = null,
+                ElapsedMilliseconds = elapsed,
             };
             using var scope = _serviceProvider.CreateScope();
             var dbService = scope.ServiceProvider.GetRequiredService<TycherosMonitoringService>();
             await dbService.AddColletedApiDataAsync(orderRec);
 
             apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckRegistrations";
-            (status, result) = await _apiService.GetApiResultAsync(apiUrl);
+            (status, elapsed, result) = await _apiService.GetApiResultAsync(apiUrl);
 
             var registrationDto = ConvertJsonToData<CheckRegistrationsDto>(result);
             var regRec = new Collectedapidatum
@@ -56,13 +57,14 @@ public class PeriodicApiService : BackgroundService
                 Note = "Timespan 1 hour",
                 JsonResponse = result,
                 ErrorDetails = null,
+                ElapsedMilliseconds = elapsed,
             };
             // using var scope = _serviceProvider.CreateScope();
             // var dbService = scope.ServiceProvider.GetRequiredService<TycherosMonitoringService>();
             await dbService.AddColletedApiDataAsync(regRec);
 
             apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckLogins";
-            (status, result) = await _apiService.GetApiResultAsync(apiUrl);
+            (status, elapsed, result) = await _apiService.GetApiResultAsync(apiUrl);
 
             var loginDto = ConvertJsonToData<CheckLoginsDto>(result);
             var loginRec = new Collectedapidatum
@@ -77,6 +79,7 @@ public class PeriodicApiService : BackgroundService
                 Note = "Timespan 1 hour",
                 JsonResponse = result,
                 ErrorDetails = null,
+                ElapsedMilliseconds = elapsed,
             };
             // using var scope = _serviceProvider.CreateScope();
             // var dbService = scope.ServiceProvider.GetRequiredService<TycherosMonitoringService>();

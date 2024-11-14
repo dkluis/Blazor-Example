@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 
 namespace _4LL_Monitoring.Services
 {
@@ -11,24 +12,23 @@ namespace _4LL_Monitoring.Services
             _httpClient = httpClient;
         }
 
-        public async Task<(HttpStatusCode, string)> GetApiResultAsync(string apiUrl)
+        public async Task<(HttpStatusCode, long, string)> GetApiResultAsync(string apiUrl)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
             try
             {
-                // Create the HTTP request
                 var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
-                // Send the request
                 var response = await _httpClient.SendAsync(request);
-                // Ensure the response is successful
                 response.EnsureSuccessStatusCode();
-                // Read and return the response content
                 var result = await response.Content.ReadAsStringAsync();
-                // Return the response content or a default message if null
-                return (response.StatusCode, result ?? "API result is null");
+                stopwatch.Stop();
+                var elapsed = stopwatch.ElapsedMilliseconds;
+                return (response.StatusCode, elapsed, result ?? "API result is null");
             }
             catch (Exception ex)
             {
-                return (HttpStatusCode.InternalServerError, "An error occurred while fetching the API result");
+                return (HttpStatusCode.InternalServerError, 0, "An error occurred while fetching the API result");
             }
         }
     }

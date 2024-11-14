@@ -3,9 +3,9 @@
 @using _4LL_Monitoring.Models
 @using _4LL_Monitoring.Services
 
-<MudText Typo="Typo.h3">Api DataGrid Example</MudText>
+@*<MudText Typo="Typo.h3">Api DataGrid Example</MudText>*@
 
-<MudButton Color="Color.Info" OnClick="ToggleSummaryOnly">Toggle Data Grid</MudButton>
+<MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleSummaryOnly">@_toggleButton</MudButton>
 
 <MudDataGrid T="Collectedapidatum"
              Items="@_statuses" SortMode="SortMode.Multiple"
@@ -17,7 +17,7 @@
              RowsPerPage="20"
              >
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Api Result Data Grid</MudText>
+        <MudText Typo="Typo.h4">Api Monitoring Data Grid</MudText>
         <MudSpacer />
         @*<MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
             AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>*@
@@ -25,12 +25,13 @@
     <Columns>
         <SelectColumn T="Collectedapidatum"/>
         <PropertyColumn Property="x => x.Id" Title="Id" Sortable="false" Filterable="false" Hidden="true" />
-        <PropertyColumn Property="x => x.ApiName" Title="Api" />
-        <PropertyColumn Property="x => x.Type" Title="Type" />
+        <PropertyColumn Property="x => x.ApiName" Title="Api Name" />
+        <PropertyColumn Property="x => x.Type" Title="Api Type" />
         <PropertyColumn Property="x => x.Threshold" Title="Threshold" />
         <PropertyColumn Property="x => x.Value" Title="Value" />
-        <PropertyColumn Property="x => x.Status" Title="Status" />
+        <PropertyColumn Property="x => x.Status" Title="Api Status" />
         <PropertyColumn Property="x => x.HttpStatusCode" Title="Http Status" />
+        <PropertyColumn Property="x => x.ElapsedMilliseconds" Title="Http Time" />
         @if (_showSummaryOnly)
         {
             <PropertyColumn Property="x => x.Created" Title="Date Time" Hideable="true"/>
@@ -77,10 +78,12 @@
     private string _searchString = string.Empty;
     private List<string> _events = new();
     private bool _showSummaryOnly;
+    private string _toggleButton = "Toggle to Summary";
 
     private void ToggleSummaryOnly()
     {
         _showSummaryOnly = !_showSummaryOnly;
+        _toggleButton = _showSummaryOnly ? "Toggle to Details" : "Toggle to Summary";
     }
 
     // quick filter - filter globally across multiple columns with the same input

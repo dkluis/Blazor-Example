@@ -35,6 +35,40 @@ public class TycherosMonitoringService
         }
     }
 
+    public class AverageHourlyApiResult
+    {
+        public string ApiName { get; set; }
+        public DateTime Date { get; set; }
+        public int Hour { get; set; }
+        public double AverageValue { get; set; }
+    }
+
+    public async Task<List<AverageHourlyApiResult>> GetAverageHourlyApiResultAsync()
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            var response = await context.Collectedapidata.Where(x => x.Value.HasValue)
+                                        .GroupBy(x => new { x.ApiName, x.Date.Date, x.Hour })
+                                        .Select(g => new AverageHourlyApiResult
+                                                 {
+                                                     ApiName = g.Key.ApiName!,
+                                                     Date = g.Key.Date.Date,
+                                                     Hour = g.Key.Hour,
+                                                     AverageValue = g.Average(x => x.Value!.Value),
+                                                 }
+                                         )
+                                        .ToListAsync();
+            return response;
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number} , Message: {e.Message}");
+            throw;
+        }
+    }
+
     public async Task<Collectedapidatum?> GetEntityByIdAsync(int id)
     {
         using var scope = _scopeFactory.CreateScope();

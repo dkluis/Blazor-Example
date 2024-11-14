@@ -52,4 +52,6 @@ public class Collectedapidatum
     public string? JsonResponse { get; set; }
 
     public string? ErrorDetails { get; set; }
+
+    public long ElapsedMilliseconds { get; set; }
 }

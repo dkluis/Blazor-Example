@@ -1,10 +1,17 @@
 ﻿@page "/CollectedDataGraph"
+
 @inject TycherosMonitoringService Service
 @using _4LL_Monitoring.Services
 
-<MudText Typo="Typo.h4">Hourly Value Averages for @DateTime.Today.Date.ToString("dd-MM-yyyy")</MudText>
+<MudText Typo="Typo.h4">Hourly Value Averages for @DateTime.UtcNow.Date.ToString("yyyy-MM-dd")</MudText>
 
 <div>
+    @*<MudSelect T="string" Label="Select API Name" @bind-Value="selectedApiName">
+        @foreach (var apiName in apiNames)
+        {
+            <MudSelectItem T="string" Value="@apiName">@apiName</MudSelectItem>
+        }
+    </MudSelect>*@
     <MudChart ChartType="ChartType.Line" ChartSeries="@Series"
               XAxisLabels="@XAxisLabels" Width="100%" Height="750" ChartOptions="options"
               CanHideSeries="true"></MudChart>
@@ -18,6 +25,9 @@
 
 @code {
     private List<TycherosMonitoringService.AverageHourlyApiResult> _averages = new ();
+    private List<string> apiNames = new () {"CheckOrders", "CheckLogins", "CheckRegistrations"};
+    private string selectedApiName = "CheckOrders";
+    private List<string> selectedListApiNames;
 
     private ChartOptions options = new ();
     private List<ChartSeries> Series = new ();
@@ -33,13 +43,27 @@
     protected override async Task OnInitializedAsync()
     {
         _averages = await Service.GetAverageHourlyApiResultAsync();
-        var dateAvg = _averages.Where(x => x.Date == DateTime.Today);
+        OnSelectionChanged();
+
+        options.InterpolationOption = InterpolationOption.Straight;
+        options.YAxisTicks = 100;
+        options.YAxisLines = true;
+        options.YAxisRequireZeroPoint = true;
+        options.MaxNumYAxisTicks = 15;
+        options.LineStrokeWidth = 1;
+        options.XAxisLines = true;
+
+    }
+
+    private void OnSelectionChanged()
+    {
+        var dateAvg = _averages.Where(x => x.Date == DateTime.UtcNow.Date);
         Series = new List<ChartSeries>()
-            {
-                new () { Name = "CheckOrders", Data = new double[24] },
-                new () { Name = "CheckLogings", Data = new double[24]  },
-                new () { Name = "CheckRegistrations", Data = new double[24] },
-            };
+        {
+            new () { Name = "CheckOrders", Data = new double[24] },
+            new () { Name = "CheckLogings", Data = new double[24]  },
+            new () { Name = "CheckRegistrations", Data = new double[24] },
+        };
 
         foreach (var rec in dateAvg)
         {
@@ -52,19 +76,10 @@
                 Series[1].Data[rec.Hour] = rec.AverageValue;
             }
             if (rec.ApiName == "CheckRegistrations")
-             {
-                 Series[2].Data[rec.Hour] = rec.AverageValue;
-             }
+            {
+                Series[2].Data[rec.Hour] = rec.AverageValue;
+            }
         }
-
-        options.InterpolationOption = InterpolationOption.Straight;
-        options.YAxisTicks = 100;
-        options.YAxisLines = true;
-        options.YAxisRequireZeroPoint = true;
-        options.MaxNumYAxisTicks = 15;
-        options.LineStrokeWidth = 1;
-        options.XAxisLines = true;
-
     }
 
 

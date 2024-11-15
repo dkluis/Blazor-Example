@@ -109,6 +109,7 @@
     private async Task NavigateToEmirateSPA() { await JSRuntime.InvokeVoidAsync("openInNewTab", "https://emiratesdraw.com/"); }
     private async Task NavigateToEmirateBO() { await JSRuntime.InvokeVoidAsync("openInNewTab", "https://backoffice.emiratesdraw.com"); }
 }
+
 <script>
     window.openInNewTab = function (url) {
         var win = window.open(url, '_blank');

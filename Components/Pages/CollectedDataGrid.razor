@@ -77,11 +77,11 @@
 </MudExpansionPanels>
 
 @code {
-    private List<Collectedapidatum> _statuses = new();
-    private string _searchString = string.Empty;
-    private List<string> _events = new();
-    private bool _showSummaryOnly;
-    private string _toggleButton = "Toggle to Summary";
+    private     List<Collectedapidatum> _statuses       = new();
+    private     string                  _searchString   = string.Empty;
+    private     List<string>            _events         = new();
+    private     bool                    _showSummaryOnly;
+    private     string                  _toggleButton = "Toggle to Summary";
 
     private void ToggleSummaryOnly()
     {
@@ -107,7 +107,11 @@
 
                return false;
            };
-    protected override async Task OnInitializedAsync() { _statuses = await Service.GetAllEntitiesAsync(); }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _statuses       = await Service.GetAllEntitiesAsync();
+    }
 
     // events
     void RowClicked(DataGridRowClickEventArgs<Collectedapidatum> args) { _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }

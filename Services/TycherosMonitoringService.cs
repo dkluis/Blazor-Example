@@ -102,4 +102,28 @@ public class TycherosMonitoringService
     }
 
     #endregion
+
+    #region AdminFunctions
+
+    public async Task<List<AdminFunction>> GetAllAdminFunctions()
+    {
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            var response = await context.AdminFunctions.ToListAsync();
+            if (response is null)
+            {
+                return new List<AdminFunction>();
+            }
+            return response!;
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number} , Message: {e.Message}");
+            throw;
+        }
+    }
+
+    #endregion
 }

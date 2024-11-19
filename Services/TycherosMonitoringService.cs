@@ -1,6 +1,7 @@
 ﻿using _4LL_Monitoring.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 
 namespace _4LL_Monitoring.Services;
 
@@ -26,17 +27,27 @@ public class TycherosMonitoringService
         }
         catch (SqlException e)
         {
-            Console.WriteLine($"Number: {e.Number} , Message: {e.Message}");
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
             throw;
         }
     }
 
     public class AverageHourlyApiResult
     {
-        public string ApiName { get; set; }
-        public DateTime Date { get; set; }
-        public int Hour { get; set; }
-        public double AverageValue { get; set; }
+        public string   ApiName      { get; set; } = "";
+        public DateTime Date         { get; set; }
+        public int      Hour         { get; set; }
+        public double   AverageValue { get; set; }
     }
 
     public async Task<List<AverageHourlyApiResult>> GetAverageHourlyApiResultAsync()
@@ -50,9 +61,9 @@ public class TycherosMonitoringService
                                         .Select(
                                                  g => new AverageHourlyApiResult
                                                  {
-                                                     ApiName = g.Key.ApiName!,
-                                                     Date = g.Key.Date.Date,
-                                                     Hour = g.Key.Hour,
+                                                     ApiName      = g.Key.ApiName!,
+                                                     Date         = g.Key.Date.Date,
+                                                     Hour         = g.Key.Hour,
                                                      AverageValue = g.Average(x => x.Value!.Value),
                                                  }
                                          )
@@ -61,42 +72,81 @@ public class TycherosMonitoringService
         }
         catch (SqlException e)
         {
-            Console.WriteLine($"Number: {e.Number} , Message: {e.Message}");
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
             throw;
         }
     }
 
-    public async Task<Collectedapidatum?> GetEntityByIdAsync(int id)
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
-        return await context.Collectedapidata.FindAsync(id);
-    }
-
     public async Task AddColletedApiDataAsync(Collectedapidatum entity)
     {
+        try {
         using var scope = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
         context.Collectedapidata.Add(entity);
         await context.SaveChangesAsync();
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
     }
 
     public async Task UpdateEntityAsync(Collectedapidatum entity)
     {
+        try {
         using var scope = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
         context.Entry(entity).State = EntityState.Modified;
         await context.SaveChangesAsync();
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
     }
 
-    public async Task DeleteEntityAsync(int id)
+    public async Task DeleteEntityAsync(DateTime startDate, DateTime endDate)
     {
+        startDate = startDate.Date;                       // Sets time to 00:00:00.000
+        endDate   = endDate.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.999
         using var scope = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
-        var entity = await context.Collectedapidata.FindAsync(id);
+        var entity = await context.Collectedapidata.Where(cd => cd.Created <= endDate && cd.Created >= startDate).ToListAsync();
         if (entity != null)
         {
-            context.Collectedapidata.Remove(entity);
+            context.Collectedapidata.RemoveRange(entity);
             await context.SaveChangesAsync();
         }
     }
@@ -120,7 +170,89 @@ public class TycherosMonitoringService
         }
         catch (SqlException e)
         {
-            Console.WriteLine($"Number: {e.Number} , Message: {e.Message}");
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
+    }
+
+    public async Task AddAdminFunctions(string adminFunction)
+    {
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            if (adminFunction == null)
+            {
+                throw new ArgumentException("AdminFunctions collection is null or empty.", nameof(adminFunction));
+            }
+
+            var rec = new AdminFunction
+            {
+                FunctionID = adminFunction,
+            };
+            await context.AdminFunctions.AddAsync(rec);
+            await context.SaveChangesAsync();
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
+    }
+
+    public async Task DeleteAdminFunction(string adminFunctionId)
+    {
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            if (string.IsNullOrWhiteSpace(adminFunctionId))
+            {
+                throw new ArgumentException("AdminFunction ID is null or empty.", nameof(adminFunctionId));
+            }
+
+            var adminFunction = await context.AdminFunctions.FindAsync(adminFunctionId);
+            if (adminFunction == null)
+            {
+                throw new InvalidOperationException($"AdminFunction with ID '{adminFunctionId}' not found.");
+            }
+
+            context.AdminFunctions.Remove(adminFunction);
+            await context.SaveChangesAsync();
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
             throw;
         }
     }

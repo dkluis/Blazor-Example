@@ -4,39 +4,70 @@
 @using MudBlazor.Components.Chart.Models
 @inject TycherosMonitoringService Service
 
-<MudGrid Justify="Justify.Center" Spacing="6">
-    <MudItem>
-        <MudPaper>
-            <MudRadioGroup @bind-Value="_selectedApiIdx">
-                <MudRadio Value="1" Color="Color.Primary" Size="Size.Small">Orders</MudRadio>
-                <MudRadio Value="2" Color="Color.Secondary" Size="Size.Small">Logins</MudRadio>
-                <MudRadio Value="3" Color="Color.Tertiary" Size="Size.Small">Registrations</MudRadio>
-            </MudRadioGroup>
-        </MudPaper>
-        <MudPaper>
-            <MudButton OnClick="Refresh" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled">Refresh</MudButton>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+<MudPaper>
+    <MudGrid Justify="Justify.Center" Spacing="6">
+        <MudItem>
+            <MudPaper Style="margin-bottom: 10px" xs="12" md="12">
+                <MudItem xs="6" md="6">
+                    <MudText Typo="Typo.body1">Start Date</MudText>
+                </MudItem>
+                <MudItem xs="8" md="8">
+                    <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_startDate"/>
+                </MudItem>
+                <MudItem xs="6" md="6">
+                    <MudText Typo="Typo.body1">End Date</MudText>
+                </MudItem>
+                <MudItem xs="8" md="8">
+                    <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_endDate"/>
+                </MudItem>
+            </MudPaper>
+            <MudPaper MudPaper Style="margin-bottom: 10px">
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnInitializedAsync">
+                    Submit Dates
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+    <MudGrid Justify="Justify.Center" Spacing="6">
+        <MudItem>
+            <MudPaper MudPaper Style="margin-bottom: 10px">
+                <MudRadioGroup @bind-Value="_selectedApiIdx">
+                    <MudRadio Value="1" Color="Color.Primary" Size="Size.Small">Orders</MudRadio>
+                    <MudRadio Value="2" Color="Color.Secondary" Size="Size.Small">Logins</MudRadio>
+                    <MudRadio Value="3" Color="Color.Tertiary" Size="Size.Small">Registrations</MudRadio>
+                </MudRadioGroup>
+            </MudPaper>
+            <MudPaper MudPaper Style="margin-bottom: 10px">
+                <MudButton OnClick="Refresh" Color="Color.Primary" ButtonType="ButtonType.Button" Variant="Variant.Filled">
+                    Refresh
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
 
 <div>
-    <MudTimeSeriesChart ChartSeries="@_series" @bind-SelectedIndex="Index" Width="100%" Height="750px" ChartOptions="@_options" CanHideSeries TimeLabelSpacing="TimeSpan.FromMinutes(5)" />
+    <MudTimeSeriesChart ChartSeries="@_series" @bind-SelectedIndex="Index" Width="100%" Height="750px" ChartOptions="@_options" CanHideSeries TimeLabelSpacing="TimeSpan.FromMinutes(5)"/>
     <MudGrid>
         <MudItem xs="6">
             <MudText Typo="Typo.body1" Class="py-3">Selected: @(Index < 0 ? "None" : _series[Index].Name)</MudText>
         </MudItem>
         <MudItem xs="6">
-            <MudSlider @bind-Value="_options.LineStrokeWidth" Min="1" Max="10" Color="Color.Info">Line Width: @_options.LineStrokeWidth.ToString()</MudSlider>
+            <MudSlider @bind-Value="_options.LineStrokeWidth" Min="1" Max="10" Color="Color.Info">Line
+                Width: @_options.LineStrokeWidth.ToString()</MudSlider>
         </MudItem>
     </MudGrid>
 </div>
 
 @code
+
 {
-    private int _selectedApiIdx = 1;
-    private List<string> ApiList = new() {"CheckOrders", "CheckLogins", "CheckRegistrations"};
-    private string selectedAPI = "CheckOrders";
-    private List<TycherosMonitoringService.AverageHourlyApiResult> _averages = new ();
+    private int                                                    _selectedApiIdx = 1;
+    private List<string>                                           ApiList         = new() {"CheckOrders", "CheckLogins", "CheckRegistrations"};
+    private string                                                 selectedAPI     = "CheckOrders";
+    private List<TycherosMonitoringService.AverageHourlyApiResult> _averages       = new();
+    private DateTime?                                              _startDate      = DateTime.UtcNow;
+    private DateTime?                                              _endDate        = DateTime.UtcNow;
 
     private async Task Refresh()
     {
@@ -45,46 +76,40 @@
     }
 
     private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
-    private ChartOptions _options = new ChartOptions
-        {
-            YAxisLines = true,
-            YAxisTicks = 100,
-            MaxNumYAxisTicks = 25,
-            YAxisRequireZeroPoint = false,
-            XAxisLines = false,
-            LineStrokeWidth = 1,
-        };
-
-    private TimeSeriesChartSeries _chart1 = new();
-    private TimeSeriesChartSeries _chart2 = new();
-    private TimeSeriesChartSeries _chart3 = new();
-
-    private List<TimeSeriesChartSeries> _series = new();
-
-    private readonly Random _random = new Random();
+    private ChartOptions _options = new()
+    {
+        YAxisLines            = true,
+        YAxisTicks            = 100,
+        MaxNumYAxisTicks      = 25,
+        YAxisRequireZeroPoint = false,
+        XAxisLines            = false,
+        LineStrokeWidth       = 1,
+    };
+    private          TimeSeriesChartSeries       _chart1 = new();
+    private          TimeSeriesChartSeries       _chart2 = new();
+    private          TimeSeriesChartSeries       _chart3 = new();
+    private          List<TimeSeriesChartSeries> _series = new();
+    private readonly Random                      _random = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _averages = await Service.GetAverageHourlyApiResultAsync();
-        var dateAvg = _averages.Where(x => x.Date == DateTime.UtcNow.Date);
+        _averages = await Service.GetAverageHourlyApiResultAsync(_startDate, _endDate);
+        var dateAvg  = _averages.Where(x => x.Date == DateTime.UtcNow.Date);
         var baseDate = DateTime.UtcNow.Date;
-        _series = new();
+        _series = new List<TimeSeriesChartSeries>();
         var tmp = dateAvg.Where(x => x.ApiName == selectedAPI).OrderBy(x => x.Hour).ToList();
         if (_selectedApiIdx == 1)
         {
             _chart1 = new TimeSeriesChartSeries
             {
-                Index = 0,
-                Name = "Check Orders",
-                Data = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(
-                                          baseDate.AddHours(x.Hour),
-                                          x.AverageValue))
-                          .ToList(),
+                Index     = 0,
+                Name      = "Check Orders",
+                Data      = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(baseDate.AddHours(x.Hour), x.AverageValue)).ToList(),
                 IsVisible = true,
-                Type = TimeSeriesDiplayType.Line
-            };
+                Type      = TimeSeriesDiplayType.Line,
+    };
             _series.Add(_chart1);
         }
         if (_selectedApiIdx == 2)
@@ -92,13 +117,10 @@
             _chart2 = new TimeSeriesChartSeries
             {
                 Index = 1,
-                Name = "Check Logins",
-                Data = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(
-                                          baseDate.AddHours(x.Hour),
-                                          x.AverageValue))
-                          .ToList(),IsVisible = true,
-                Type = TimeSeriesDiplayType.Line
-            };
+                Name  = "Check Logins",
+                Data  = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(baseDate.AddHours(x.Hour), x.AverageValue)).ToList(), IsVisible = true,
+                Type  = TimeSeriesDiplayType.Line,
+    };
             _series.Add(_chart2);
         }
         if (_selectedApiIdx == 3)
@@ -106,13 +128,10 @@
             _chart3 = new TimeSeriesChartSeries
             {
                 Index = 2,
-                Name = "Check Registrations",
-                Data = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(
-                                          baseDate.AddHours(x.Hour),
-                                          x.AverageValue))
-                          .ToList(),IsVisible = true,
-                Type = TimeSeriesDiplayType.Area
-            };
+                Name  = "Check Registrations",
+                Data  = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(baseDate.AddHours(x.Hour), x.AverageValue)).ToList(), IsVisible = true,
+                Type  = TimeSeriesDiplayType.Area,
+    };
             _series.Add(_chart3);
         }
 

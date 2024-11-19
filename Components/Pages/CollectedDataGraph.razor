@@ -3,15 +3,28 @@
 @inject TycherosMonitoringService Service
 @using _4LL_Monitoring.Services
 
-<MudText Typo="Typo.h4">Hourly Value Averages for @DateTime.UtcNow.Date.ToString("yyyy-MM-dd")</MudText>
-
 <div>
-    @*<MudSelect T="string" Label="Select API Name" @bind-Value="selectedApiName">
-        @foreach (var apiName in apiNames)
-        {
-            <MudSelectItem T="string" Value="@apiName">@apiName</MudSelectItem>
-        }
-    </MudSelect>*@
+    <MudPaper>
+        <MudGrid Justify="Justify.Center" Spacing="6">
+
+            <MudItem>
+                <MudPaper Style="margin-bottom: 10px">
+                    <MudText Typo="Typo.h4">Hourly Value Averages for @(_startDate?.ToString("yyyy-MM-dd"))</MudText>
+                    <MudItem xs="6" md="6">
+                        <MudText Typo="Typo.body1">Select Date</MudText>
+                    </MudItem>
+                    <MudItem xs="8" md="8">
+                        <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_startDate"/>
+                    </MudItem>
+                </MudPaper>
+                <MudPaper>
+                    <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSelectionChanged">
+                        Submit Dates
+                    </MudButton>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
     <MudChart ChartType="ChartType.Line" ChartSeries="@Series"
               XAxisLabels="@XAxisLabels" Width="100%" Height="750" ChartOptions="options"
               CanHideSeries="true"></MudChart>
@@ -24,15 +37,19 @@
 </div>
 
 @code {
-    private List<TycherosMonitoringService.AverageHourlyApiResult> _averages = new ();
-    private List<string> apiNames = new () {"CheckOrders", "CheckLogins", "CheckRegistrations"};
-    private string selectedApiName = "CheckOrders";
-    private List<string> selectedListApiNames;
-
-    private ChartOptions options = new ();
-    private List<ChartSeries> Series = new ();
-    private string[] XAxisLabels = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-        "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24" };
+    private List<TycherosMonitoringService.AverageHourlyApiResult> _averages       = new();
+    private List<string>                                           apiNames        = new() {"CheckOrders", "CheckLogins", "CheckRegistrations"};
+    private string                                                 selectedApiName = "CheckOrders";
+    private List<string>                                           selectedListApiNames;
+    private DateTime?                                              _startDate = DateTime.UtcNow;
+    private DateTime?                                              _endDate   = DateTime.UtcNow;
+    private ChartOptions                                           options    = new();
+    private List<ChartSeries>                                      Series     = new();
+    private string[] XAxisLabels =
+    {
+        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+        "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"
+    };
 
     void OnClickMenu(InterpolationOption interpolationOption)
     {
@@ -42,30 +59,30 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _averages = await Service.GetAverageHourlyApiResultAsync();
-        OnSelectionChanged();
+        await OnSelectionChanged();
 
-        options.InterpolationOption = InterpolationOption.Straight;
-        options.YAxisTicks = 100;
-        options.YAxisLines = true;
+        options.InterpolationOption   = InterpolationOption.Straight;
+        options.YAxisTicks            = 100;
+        options.YAxisLines            = true;
         options.YAxisRequireZeroPoint = true;
-        options.MaxNumYAxisTicks = 15;
-        options.LineStrokeWidth = 1;
-        options.XAxisLines = true;
-
+        options.MaxNumYAxisTicks      = 15;
+        options.LineStrokeWidth       = 1;
+        options.XAxisLines            = true;
     }
 
-    private void OnSelectionChanged()
+    private async Task OnSelectionChanged()
     {
-        var dateAvg = _averages.Where(x => x.Date == DateTime.UtcNow.Date);
+        _endDate = _startDate;
+        _averages    = await Service.GetAverageHourlyApiResultAsync(_startDate, _endDate);
+
         Series = new List<ChartSeries>()
         {
-            new () { Name = "CheckOrders", Data = new double[24] },
-            new () { Name = "CheckLogings", Data = new double[24]  },
-            new () { Name = "CheckRegistrations", Data = new double[24] },
+            new() {Name = "CheckOrders", Data        = new double[24]},
+            new() {Name = "CheckLogings", Data       = new double[24]},
+            new() {Name = "CheckRegistrations", Data = new double[24]},
         };
 
-        foreach (var rec in dateAvg)
+        foreach (var rec in _averages)
         {
             if (rec.ApiName == "CheckOrders")
             {
@@ -82,6 +99,4 @@
         }
     }
 
-
-    
 }

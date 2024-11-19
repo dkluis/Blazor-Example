@@ -12,13 +12,51 @@ public class TycherosMonitoringService
 
     #region CollectedApiDatum
 
-    public async Task<List<Collectedapidatum>> GetAllEntitiesAsync()
+    public async Task<List<Collectedapidatum>> GetAllCollectedData()
     {
-        using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
         try
         {
             var response = await context.Collectedapidata.ToListAsync();
+            if (response is null)
+            {
+                return new List<Collectedapidatum>();
+            }
+            return response!;
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
+    }
+
+    public async Task<List<Collectedapidatum>> GetAllCollectedData(DateTime? startDate, DateTime? endDate)
+    {
+        if (startDate == null) { startDate = DateTime.UtcNow; }
+        if (endDate   == null) { endDate   = DateTime.UtcNow; }
+
+        startDate = startDate.Value.Date;                       // Sets time to 00:00:00.000
+        endDate   = endDate.Value.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.999
+
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+
+        try
+        {
+            var response = await context.Collectedapidata.Where(cd => cd.Created <= endDate && cd.Created >= startDate)
+                                        .ToListAsync();
             if (response is null)
             {
                 return new List<Collectedapidatum>();
@@ -50,22 +88,29 @@ public class TycherosMonitoringService
         public double   AverageValue { get; set; }
     }
 
-    public async Task<List<AverageHourlyApiResult>> GetAverageHourlyApiResultAsync()
+    public async Task<List<AverageHourlyApiResult>> GetAverageHourlyApiResultAsync(DateTime? startDate,
+        DateTime?                                                                            endDate)
     {
-        using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        if (startDate == null) { startDate = DateTime.UtcNow; }
+        if (endDate   == null) { endDate   = DateTime.UtcNow; }
+
+        startDate = startDate.Value.Date;                       // Sets time to 00:00:00.000
+        endDate   = endDate.Value.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.999
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
         try
         {
-            var response = await context.Collectedapidata.Where(x => x.Value.HasValue)
+            var response = await context.Collectedapidata
+                                        .Where(x => x.Value.HasValue && x.Created >= startDate && x.Created <= endDate)
                                         .GroupBy(x => new {x.ApiName, x.Date.Date, x.Hour})
                                         .Select(
-                                                 g => new AverageHourlyApiResult
-                                                 {
-                                                     ApiName      = g.Key.ApiName!,
-                                                     Date         = g.Key.Date.Date,
-                                                     Hour         = g.Key.Hour,
-                                                     AverageValue = g.Average(x => x.Value!.Value),
-                                                 }
+                                             g => new AverageHourlyApiResult
+                                             {
+                                                 ApiName      = g.Key.ApiName!,
+                                                 Date         = g.Key.Date.Date,
+                                                 Hour         = g.Key.Hour,
+                                                 AverageValue = g.Average(x => x.Value!.Value),
+                                             }
                                          )
                                         .ToListAsync();
             return response;
@@ -89,11 +134,12 @@ public class TycherosMonitoringService
 
     public async Task AddColletedApiDataAsync(Collectedapidatum entity)
     {
-        try {
-        using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
-        context.Collectedapidata.Add(entity);
-        await context.SaveChangesAsync();
+        try
+        {
+            using var scope   = _scopeFactory.CreateScope();
+            var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+            context.Collectedapidata.Add(entity);
+            await context.SaveChangesAsync();
         }
         catch (SqlException e)
         {
@@ -114,11 +160,12 @@ public class TycherosMonitoringService
 
     public async Task UpdateEntityAsync(Collectedapidatum entity)
     {
-        try {
-        using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
-        context.Entry(entity).State = EntityState.Modified;
-        await context.SaveChangesAsync();
+        try
+        {
+            using var scope   = _scopeFactory.CreateScope();
+            var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+            context.Entry(entity).State = EntityState.Modified;
+            await context.SaveChangesAsync();
         }
         catch (SqlException e)
         {
@@ -141,9 +188,10 @@ public class TycherosMonitoringService
     {
         startDate = startDate.Date;                       // Sets time to 00:00:00.000
         endDate   = endDate.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.999
-        using var scope = _scopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
-        var entity = await context.Collectedapidata.Where(cd => cd.Created <= endDate && cd.Created >= startDate).ToListAsync();
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var entity = await context.Collectedapidata.Where(cd => cd.Created <= endDate && cd.Created >= startDate)
+                                  .ToListAsync();
         if (entity != null)
         {
             context.Collectedapidata.RemoveRange(entity);

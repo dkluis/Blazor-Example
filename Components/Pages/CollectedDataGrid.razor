@@ -6,6 +6,30 @@
 
 @*<MudText Typo="Typo.h3">Api DataGrid Example</MudText>*@
 
+<MudPaper>
+    <MudGrid Justify="Justify.Center" Spacing="6">
+        <MudItem>
+            <MudPaper Width="250px" Style="margin-bottom: 10px">
+                <MudItem xs="6" md="6">
+                    <MudText Typo="Typo.body1">Start Date</MudText>
+                </MudItem>
+                <MudItem xs="8" md="8">
+                    <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_startDate"/>
+                </MudItem>
+                <MudItem xs="6" md="6">
+                    <MudText Typo="Typo.body1">End Date</MudText>
+                </MudItem>
+                <MudItem xs="8" md="8">
+                    <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_endDate"/>
+                </MudItem>
+            </MudPaper>
+            <MudPaper>
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnInitializedAsync">Submit Dates</MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleSummaryOnly">@_toggleButton</MudButton>
 
 <MudDataGrid T="Collectedapidatum"
@@ -20,8 +44,6 @@
     <ToolBarContent>
         <MudText Typo="Typo.h4">Api Monitoring Data Grid</MudText>
         <MudSpacer/>
-        @*<MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>*@
     </ToolBarContent>
     <Columns>
         <SelectColumn T="Collectedapidatum"/>
@@ -77,44 +99,46 @@
 </MudExpansionPanels>
 
 @code {
-    private     List<Collectedapidatum> _statuses       = new();
-    private     string                  _searchString   = string.Empty;
-    private     List<string>            _events         = new();
-    private     bool                    _showSummaryOnly;
-    private     string                  _toggleButton = "Toggle to Summary";
+    private List<Collectedapidatum> _statuses     = new();
+    private string                  _searchString = string.Empty;
+    private List<string>            _events       = new();
+    private bool                    _showSummaryOnly;
+    private string                  _toggleButton = "Toggle to Summary";
+    private DateTime?                _startDate    = DateTime.UtcNow;
+    private DateTime?                _endDate      = DateTime.UtcNow;
 
     private void ToggleSummaryOnly()
     {
         _showSummaryOnly = !_showSummaryOnly;
-        _toggleButton = _showSummaryOnly ? "Toggle to Details" : "Toggle to Summary";
+        _toggleButton    = _showSummaryOnly ? "Toggle to Details" : "Toggle to Summary";
     }
 
     // quick filter - filter globally across multiple columns with the same input
     private Func<Collectedapidatum, bool> QuickFilter
         => x =>
-           {
-               if (string.IsNullOrWhiteSpace(_searchString))
-                   return true;
+        {
+            if (string.IsNullOrWhiteSpace(_searchString))
+                return true;
 
-               if (x.ApiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-                   return true;
+            if (x.ApiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
 
-               if (x.Status.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-                   return true;
+            if (x.Status.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
 
-               if ($"{x.Value} {x.Threshold} ".Contains(_searchString))
-                   return true;
+            if ($"{x.Value} {x.Threshold} ".Contains(_searchString))
+                return true;
 
-               return false;
-           };
+            return false;
+        };
 
     protected override async Task OnInitializedAsync()
     {
-        _statuses       = await Service.GetAllEntitiesAsync();
+        _statuses = await Service.GetAllCollectedData(_startDate, _endDate);
     }
 
     // events
-    void RowClicked(DataGridRowClickEventArgs<Collectedapidatum> args) { _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
-    void RowRightClicked(DataGridRowClickEventArgs<Collectedapidatum> args) { _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
-    void SelectedItemsChanged(HashSet<Collectedapidatum> items) { _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}"); }
+    void RowClicked(DataGridRowClickEventArgs<Collectedapidatum>      args)  { _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void RowRightClicked(DataGridRowClickEventArgs<Collectedapidatum> args)  { _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void SelectedItemsChanged(HashSet<Collectedapidatum>              items) { _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}"); }
 }

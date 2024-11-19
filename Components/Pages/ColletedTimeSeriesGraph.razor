@@ -22,7 +22,7 @@
                 </MudItem>
             </MudPaper>
             <MudPaper MudPaper Style="margin-bottom: 10px">
-                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnInitializedAsync">
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSelectionChanged">
                     Submit Dates
                 </MudButton>
             </MudPaper>
@@ -52,14 +52,12 @@
         <MudItem xs="6">
             <MudText Typo="Typo.body1" Class="py-3">Selected: @(Index < 0 ? "None" : _series[Index].Name)</MudText>
         </MudItem>
-        <MudItem xs="6">
-            <MudSlider @bind-Value="_options.LineStrokeWidth" Min="1" Max="10" Color="Color.Info">Line
-                Width: @_options.LineStrokeWidth.ToString()</MudSlider>
-        </MudItem>
     </MudGrid>
 </div>
 
 @code
+
+
 
 {
     private int                                                    _selectedApiIdx = 1;
@@ -85,21 +83,19 @@
         XAxisLines            = false,
         LineStrokeWidth       = 1,
     };
-    private          TimeSeriesChartSeries       _chart1 = new();
-    private          TimeSeriesChartSeries       _chart2 = new();
-    private          TimeSeriesChartSeries       _chart3 = new();
-    private          List<TimeSeriesChartSeries> _series = new();
-    private readonly Random                      _random = new();
+    private                  TimeSeriesChartSeries       _chart1 = new();
+    private                  TimeSeriesChartSeries       _chart2 = new();
+    private                  TimeSeriesChartSeries       _chart3 = new();
+    private                  List<TimeSeriesChartSeries> _series = new();
+    protected override async Task                        OnInitializedAsync() { await OnSelectionChanged(); }
 
-    protected override async Task OnInitializedAsync()
+    private async Task OnSelectionChanged()
     {
-        await base.OnInitializedAsync();
-
         _averages = await Service.GetAverageHourlyApiResultAsync(_startDate, _endDate);
-        var dateAvg  = _averages.Where(x => x.Date == DateTime.UtcNow.Date);
-        var baseDate = DateTime.UtcNow.Date;
+        //var dateAvg  = _averages.Where(x => x.Date == DateTime.UtcNow.Date);
+        var baseDate = _startDate ?? DateTime.UtcNow;
         _series = new List<TimeSeriesChartSeries>();
-        var tmp = dateAvg.Where(x => x.ApiName == selectedAPI).OrderBy(x => x.Hour).ToList();
+        var tmp = _averages.Where(x => x.ApiName == selectedAPI).OrderBy(x => x.Hour).ToList();
         if (_selectedApiIdx == 1)
         {
             _chart1 = new TimeSeriesChartSeries
@@ -109,7 +105,7 @@
                 Data      = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(baseDate.AddHours(x.Hour), x.AverageValue)).ToList(),
                 IsVisible = true,
                 Type      = TimeSeriesDiplayType.Line,
-    };
+            };
             _series.Add(_chart1);
         }
         if (_selectedApiIdx == 2)
@@ -120,7 +116,7 @@
                 Name  = "Check Logins",
                 Data  = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(baseDate.AddHours(x.Hour), x.AverageValue)).ToList(), IsVisible = true,
                 Type  = TimeSeriesDiplayType.Line,
-    };
+            };
             _series.Add(_chart2);
         }
         if (_selectedApiIdx == 3)
@@ -131,7 +127,7 @@
                 Name  = "Check Registrations",
                 Data  = tmp.Select(x => new TimeSeriesChartSeries.TimeValue(baseDate.AddHours(x.Hour), x.AverageValue)).ToList(), IsVisible = true,
                 Type  = TimeSeriesDiplayType.Area,
-    };
+            };
             _series.Add(_chart3);
         }
 

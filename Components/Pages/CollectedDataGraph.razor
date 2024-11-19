@@ -3,38 +3,37 @@
 @inject TycherosMonitoringService Service
 @using _4LL_Monitoring.Services
 
-<div>
-    <MudPaper>
-        <MudGrid Justify="Justify.Center" Spacing="6">
 
-            <MudItem>
-                <MudPaper Style="margin-bottom: 10px">
-                    <MudText Typo="Typo.h4">Hourly Value Averages for @(_startDate?.ToString("yyyy-MM-dd"))</MudText>
-                    <MudItem xs="6" md="6">
-                        <MudText Typo="Typo.body1">Select Date</MudText>
-                    </MudItem>
-                    <MudItem xs="8" md="8">
-                        <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_startDate"/>
-                    </MudItem>
-                </MudPaper>
-                <MudPaper>
-                    <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSelectionChanged">
-                        Submit Dates
-                    </MudButton>
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
-    </MudPaper>
+<MudPaper Outlined="true" Elevation="2" Class="p-4" Style="border-radius: 25px;">
+    <MudGrid Justify="Justify.Center" Spacing="6">
+        <MudItem>
+            <MudPaper Style="margin-bottom: 10px">
+                <MudText Typo="Typo.h4">Hourly Value Averages for @(_startDate?.ToString("yyyy-MM-dd"))</MudText>
+                <MudItem xs="4" md="4">
+                    <MudText Typo="Typo.body1">Select Date</MudText>
+                </MudItem>
+                <MudItem xs="4" md="4">
+                    <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_startDate"/>
+                </MudItem>
+            </MudPaper>
+            <MudPaper>
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSelectionChanged">
+                    Submit Dates
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<MudPaper Outlined="true" Elevation="2" Class="p-4" Style="border-radius: 25px;">
     <MudChart ChartType="ChartType.Line" ChartSeries="@Series"
               XAxisLabels="@XAxisLabels" Width="100%" Height="750" ChartOptions="options"
               CanHideSeries="true"></MudChart>
     <MudMenu Label="Interpolation Algorithm" FullWidth="true">
         <MudMenuItem OnClick="() => OnClickMenu(InterpolationOption.Straight)">Straight</MudMenuItem>
         <MudMenuItem OnClick="() => OnClickMenu(InterpolationOption.NaturalSpline)">Natural Spline</MudMenuItem>
-        <MudMenuItem OnClick="() => OnClickMenu(InterpolationOption.EndSlope)">End Slope</MudMenuItem>
-        @*<MudMenuItem OnClick="() => OnClickMenu(InterpolationOption.Periodic)">Periodic</MudMenuItem>*@
     </MudMenu>
-</div>
+</MudPaper>
+
 
 @code {
     private List<TycherosMonitoringService.AverageHourlyApiResult> _averages       = new();
@@ -72,8 +71,8 @@
 
     private async Task OnSelectionChanged()
     {
-        _endDate = _startDate;
-        _averages    = await Service.GetAverageHourlyApiResultAsync(_startDate, _endDate);
+        _endDate  = _startDate;
+        _averages = await Service.GetAverageHourlyApiResultAsync(_startDate, _endDate);
 
         Series = new List<ChartSeries>()
         {

@@ -1,9 +1,36 @@
 ﻿@page "/CollectedDataGrid"
+
 @inject TycherosMonitoringService Service
 @using _4LL_Monitoring.Models
 @using _4LL_Monitoring.Services
 
-<MudText Typo="Typo.h3">Api DataGrid Example</MudText>
+@*<MudText Typo="Typo.h3">Api DataGrid Example</MudText>*@
+
+<MudPaper>
+    <MudGrid Justify="Justify.Center" Spacing="6">
+        <MudItem>
+            <MudPaper Width="250px" Style="margin-bottom: 10px">
+                <MudItem xs="6" md="6">
+                    <MudText Typo="Typo.body1">Start Date</MudText>
+                </MudItem>
+                <MudItem xs="8" md="8">
+                    <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_startDate"/>
+                </MudItem>
+                <MudItem xs="6" md="6">
+                    <MudText Typo="Typo.body1">End Date</MudText>
+                </MudItem>
+                <MudItem xs="8" md="8">
+                    <MudDatePicker Style="margin-bottom: 10px" @bind-Date="_endDate"/>
+                </MudItem>
+            </MudPaper>
+            <MudPaper>
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="OnInitializedAsync">Submit Dates</MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleSummaryOnly">@_toggleButton</MudButton>
 
 <MudDataGrid T="Collectedapidatum"
              Items="@_statuses" SortMode="SortMode.Multiple"
@@ -12,36 +39,44 @@
              RowContextMenuClick="RowRightClicked"
              SelectedItemsChanged="@SelectedItemsChanged"
              MultiSelection="false"
-             >
+             RowsPerPage="20"
+>
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Api Result Data Grid</MudText>
-        <MudSpacer />
-        @*<MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>*@
+        <MudText Typo="Typo.h4">Api Monitoring Data Grid</MudText>
+        <MudSpacer/>
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="Collectedapidatum" />
-        <PropertyColumn Property="x => x.Id" Title="Id" Sortable="false" Filterable="false" Hidden="true" />
-        <PropertyColumn Property="x => x.ApiName" Title="Api" />
-        <PropertyColumn Property="x => x.Type" Title="Type" />
-        <PropertyColumn Property="x => x.Threshold" Title="Threshold" />
-        <PropertyColumn Property="x => x.Value" Title="Value" />
-        <PropertyColumn Property="x => x.Status" Title="Status" />
-        <PropertyColumn Property="x => x.HttpStatusCode" Title="Http Status" />
-        @*<PropertyColumn Property="x => x.Created" Title="Date Time" />*@
-        <PropertyColumn Property="x => x.Date" Title="Date" />
-        <PropertyColumn Property="x => x.Year" Title="Year" />
-        <PropertyColumn Property="x => x.Month" Title="Month" />
-        <PropertyColumn Property="x => x.Day" Title="Day" />
-        <PropertyColumn Property="x => x.Hour" Title="Hour" />
-        <PropertyColumn Property="x => x.Minute" Title="Min" />
-        <PropertyColumn Property="x => x.Note" Title="Notes" />
-        <PropertyColumn Property="x => x.ErrorDetails" Title="Errors" />
-        <PropertyColumn Property="x => x.JsonResponse" Title="Raw Response" Filterable="false" Sortable="false"/>
-
+        <SelectColumn T="Collectedapidatum"/>
+        <PropertyColumn Property="x => x.Id" Title="Id" Sortable="false" Filterable="false" Hidden="true"/>
+        <PropertyColumn Property="x => x.ApiName" Title="Api Name"/>
+        <PropertyColumn Property="x => x.Type" Title="Api Type"/>
+        <PropertyColumn Property="x => x.Threshold" Title="Threshold"/>
+        <PropertyColumn Property="x => x.Value" Title="Value"/>
+        <PropertyColumn Property="x => x.Status" Title="Api Status"/>
+        <PropertyColumn Property="x => x.HttpStatusCode" Title="Http Status"/>
+        <PropertyColumn Property="x => x.ElapsedMilliseconds" Title="Http Time"/>
+        @if (_showSummaryOnly)
+        {
+            <PropertyColumn Property="x => x.Created" Title="Date Time" Hideable="true"/>
+        }
+        @if (!_showSummaryOnly)
+        {
+            <PropertyColumn Property="x => x.Date" Title="Date" format="yyyy-MM-dd"/>
+            <PropertyColumn Property="x => x.Year" Title="Year"/>
+            <PropertyColumn Property="x => x.Month" Title="Month"/>
+            <PropertyColumn Property="x => x.Day" Title="Day"/>
+            <PropertyColumn Property="x => x.Hour" Title="Hour"/>
+            <PropertyColumn Property="x => x.Minute" Title="Min"/>
+        }
+        <PropertyColumn Property="x => x.Note" Title="Notes"/>
+        <PropertyColumn Property="x => x.ErrorDetails" Title="Errors"/>
+        @if (!_showSummaryOnly)
+        {
+            <PropertyColumn Property="x => x.JsonResponse" Title="Raw Response" Hideable="true"/>
+        }
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="Collectedapidatum" />
+        <MudDataGridPager T="Collectedapidatum"/>
     </PagerContent>
 </MudDataGrid>
 
@@ -51,57 +86,59 @@
         {
             <MudText Typo="@Typo.body2">@message</MudText>
         }
-        @if(_events.Count > 0)
+        @if (_events.Count > 0)
         {
             <div class="d-flex">
                 <MudSpacer/>
-                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="@(() => _events.Clear())">Clear</MudButton>
+                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="@(() => _events.Clear())">
+                    Clear
+                </MudButton>
             </div>
         }
     </MudExpansionPanel>
 </MudExpansionPanels>
 
 @code {
-    private List<Collectedapidatum> _statuses = new List<Collectedapidatum>();
-    private string _searchString = string.Empty;
-    private List<string> _events = new();
+    private List<Collectedapidatum> _statuses     = new();
+    private string                  _searchString = string.Empty;
+    private List<string>            _events       = new();
+    private bool                    _showSummaryOnly;
+    private string                  _toggleButton = "Toggle to Summary";
+    private DateTime?                _startDate    = DateTime.UtcNow;
+    private DateTime?                _endDate      = DateTime.UtcNow;
+
+    private void ToggleSummaryOnly()
+    {
+        _showSummaryOnly = !_showSummaryOnly;
+        _toggleButton    = _showSummaryOnly ? "Toggle to Details" : "Toggle to Summary";
+    }
 
     // quick filter - filter globally across multiple columns with the same input
-    private Func<Collectedapidatum, bool> QuickFilter => x =>
-    {
-        if (string.IsNullOrWhiteSpace(_searchString))
-            return true;
+    private Func<Collectedapidatum, bool> QuickFilter
+        => x =>
+        {
+            if (string.IsNullOrWhiteSpace(_searchString))
+                return true;
 
-        if (x.ApiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+            if (x.ApiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
 
-        if (x.Status.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+            if (x.Status.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+                return true;
 
-        if ($"{x.Value} {x.Threshold} ".Contains(_searchString))
-            return true;
+            if ($"{x.Value} {x.Threshold} ".Contains(_searchString))
+                return true;
 
-        return false;
-    };
+            return false;
+        };
 
     protected override async Task OnInitializedAsync()
     {
-        _statuses = await Service.GetAllEntitiesAsync();
+        _statuses = await Service.GetAllCollectedData(_startDate, _endDate);
     }
 
     // events
-    void RowClicked(DataGridRowClickEventArgs<Collectedapidatum> args)
-    {
-        _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void RowRightClicked(DataGridRowClickEventArgs<Collectedapidatum> args)
-    {
-        _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}");
-    }
-
-    void SelectedItemsChanged(HashSet<Collectedapidatum> items)
-    {
-        _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}");
-    }
+    void RowClicked(DataGridRowClickEventArgs<Collectedapidatum>      args)  { _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void RowRightClicked(DataGridRowClickEventArgs<Collectedapidatum> args)  { _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void SelectedItemsChanged(HashSet<Collectedapidatum>              items) { _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}"); }
 }

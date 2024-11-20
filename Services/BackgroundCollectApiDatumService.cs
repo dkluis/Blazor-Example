@@ -4,14 +4,14 @@ using _4LL_Monitoring.Models;
 
 namespace _4LL_Monitoring.Services;
 
-public class PeriodicApiService : BackgroundService
+public class BackgroundCollectApiDatumService : BackgroundService
 {
-    private readonly ApiService _apiService;
+    private readonly GetApiResponseService _getApiResponseService;
     private readonly IServiceProvider _serviceProvider;
 
-    public PeriodicApiService(ApiService apiService, IServiceProvider serviceProvider)
+    public BackgroundCollectApiDatumService(GetApiResponseService getApiResponseService, IServiceProvider serviceProvider)
     {
-        _apiService = apiService;
+        _getApiResponseService = getApiResponseService;
         _serviceProvider = serviceProvider;
     }
 
@@ -20,10 +20,10 @@ public class PeriodicApiService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             var apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckOrders";
-            var (status, elapsed, result) = await _apiService.GetApiResultAsync(apiUrl);
+            var (status, elapsed, result) = await _getApiResponseService.GetApiResultAsync(apiUrl);
 
             var ordersDto = ConvertJsonToData<CheckOrdersDto>(result);
-            var orderRec = new Collectedapidatum
+            var orderRec = new CollectApiDatum
             {
                 HttpStatusCode = (int) status,
                 Created = DateTime.UtcNow,
@@ -42,10 +42,10 @@ public class PeriodicApiService : BackgroundService
             await dbService.AddColletedApiDataAsync(orderRec);
 
             apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckRegistrations";
-            (status, elapsed, result) = await _apiService.GetApiResultAsync(apiUrl);
+            (status, elapsed, result) = await _getApiResponseService.GetApiResultAsync(apiUrl);
 
             var registrationDto = ConvertJsonToData<CheckRegistrationsDto>(result);
-            var regRec = new Collectedapidatum
+            var regRec = new CollectApiDatum
             {
                 HttpStatusCode = (int) status,
                 Created = DateTime.UtcNow,
@@ -62,10 +62,10 @@ public class PeriodicApiService : BackgroundService
             await dbService.AddColletedApiDataAsync(regRec);
 
             apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckLogins";
-            (status, elapsed, result) = await _apiService.GetApiResultAsync(apiUrl);
+            (status, elapsed, result) = await _getApiResponseService.GetApiResultAsync(apiUrl);
 
             var loginDto = ConvertJsonToData<CheckLoginsDto>(result);
-            var loginRec = new Collectedapidatum
+            var loginRec = new CollectApiDatum
             {
                 HttpStatusCode = (int) status,
                 Created = DateTime.UtcNow,

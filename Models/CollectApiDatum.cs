@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace _4LL_Monitoring.Models;
 
-public class Collectedapidatum
+public class CollectApiDatum
 {
     [Key]
     public int Id { get;             set; }
@@ -15,9 +15,9 @@ public class Collectedapidatum
     public string? ApiName { get; set; }
     [Required]
     [MaxLength(20)]
-    public string Type { get;    set; }
-    public int? Threshold { get; set; }
-    public int? Value     { get; set; }
+    public required string Type { get; set; }
+    public int? Threshold { get;       set; }
+    public int? Value     { get;       set; }
     [MaxLength(255)]
     public string? Status { get; set; }
 

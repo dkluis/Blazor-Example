@@ -32,7 +32,7 @@
 
 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" OnClick="ToggleSummaryOnly">@_toggleButton</MudButton>
 
-<MudDataGrid T="Collectedapidatum"
+<MudDataGrid T="CollectApiDatum"
              Items="@_statuses" SortMode="SortMode.Multiple"
              Filterable="true" QuickFilter="@QuickFilter"
              Hideable="true" RowClick="@RowClicked"
@@ -46,7 +46,7 @@
         <MudSpacer/>
     </ToolBarContent>
     <Columns>
-        <SelectColumn T="Collectedapidatum"/>
+        <SelectColumn T="CollectApiDatum"/>
         <PropertyColumn Property="x => x.Id" Title="Id" Sortable="false" Filterable="false" Hidden="true"/>
         <PropertyColumn Property="x => x.ApiName" Title="Api Name"/>
         <PropertyColumn Property="x => x.Type" Title="Api Type"/>
@@ -76,7 +76,7 @@
         }
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="Collectedapidatum"/>
+        <MudDataGridPager T="CollectApiDatum"/>
     </PagerContent>
 </MudDataGrid>
 
@@ -99,7 +99,7 @@
 </MudExpansionPanels>
 
 @code {
-    private List<Collectedapidatum> _statuses     = new();
+    private List<CollectApiDatum> _statuses     = new();
     private string                  _searchString = string.Empty;
     private List<string>            _events       = new();
     private bool                    _showSummaryOnly;
@@ -114,16 +114,16 @@
     }
 
     // quick filter - filter globally across multiple columns with the same input
-    private Func<Collectedapidatum, bool> QuickFilter
+    private Func<CollectApiDatum, bool> QuickFilter
         => x =>
         {
             if (string.IsNullOrWhiteSpace(_searchString))
                 return true;
 
-            if (x.ApiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            if (x.ApiName!.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            if (x.Status.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            if (x.Status!.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
                 return true;
 
             if ($"{x.Value} {x.Threshold} ".Contains(_searchString))
@@ -138,7 +138,7 @@
     }
 
     // events
-    void RowClicked(DataGridRowClickEventArgs<Collectedapidatum>      args)  { _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
-    void RowRightClicked(DataGridRowClickEventArgs<Collectedapidatum> args)  { _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
-    void SelectedItemsChanged(HashSet<Collectedapidatum>              items) { _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}"); }
+    void RowClicked(DataGridRowClickEventArgs<CollectApiDatum>      args)  { _events.Insert(0, $"Event = RowClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void RowRightClicked(DataGridRowClickEventArgs<CollectApiDatum> args)  { _events.Insert(0, $"Event = RowRightClick, Index = {args.RowIndex}, Data = {System.Text.Json.JsonSerializer.Serialize(args.Item)}"); }
+    void SelectedItemsChanged(HashSet<CollectApiDatum>              items) { _events.Insert(0, $"Event = SelectedItemsChanged, Data = {System.Text.Json.JsonSerializer.Serialize(items)}"); }
 }

@@ -25,8 +25,8 @@
     </MudGrid>
 </MudPaper>
 <MudPaper Outlined="true" Elevation="2" Class="p-4" Style="border-radius: 25px;">
-    <MudChart ChartType="ChartType.Line" ChartSeries="@Series"
-              XAxisLabels="@XAxisLabels" Width="100%" Height="750" ChartOptions="options"
+    <MudChart ChartType="ChartType.Line" ChartSeries="@_series"
+              XAxisLabels="@_xAxisLabels" Width="100%" Height="750" ChartOptions="_options"
               CanHideSeries="true"></MudChart>
     <MudMenu Label="Interpolation Algorithm" FullWidth="true">
         <MudMenuItem OnClick="() => OnClickMenu(InterpolationOption.Straight)">Straight</MudMenuItem>
@@ -36,15 +36,12 @@
 
 
 @code {
-    private List<DbService.AverageHourlyApiResult> _averages       = new();
-    private List<string>                                           apiNames        = new() {"CheckOrders", "CheckLogins", "CheckRegistrations"};
-    private string                                                 selectedApiName = "CheckOrders";
-    private List<string>                                           selectedListApiNames;
-    private DateTime?                                              _startDate = DateTime.UtcNow;
-    private DateTime?                                              _endDate   = DateTime.UtcNow;
-    private ChartOptions                                           options    = new();
-    private List<ChartSeries>                                      Series     = new();
-    private string[] XAxisLabels =
+    private List<DbService.AverageHourlyApiResult> _averages            = new();
+    private DateTime?                              _startDate           = DateTime.UtcNow;
+    private DateTime?                              _endDate             = DateTime.UtcNow;
+    private ChartOptions                           _options              = new();
+    private List<ChartSeries>                      _series               = new();
+    private string[] _xAxisLabels =
     {
         "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
         "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"
@@ -52,7 +49,7 @@
 
     void OnClickMenu(InterpolationOption interpolationOption)
     {
-        options.InterpolationOption = interpolationOption;
+        _options.InterpolationOption = interpolationOption;
         StateHasChanged();
     }
 
@@ -60,13 +57,13 @@
     {
         await OnSelectionChanged();
 
-        options.InterpolationOption   = InterpolationOption.Straight;
-        options.YAxisTicks            = 100;
-        options.YAxisLines            = true;
-        options.YAxisRequireZeroPoint = true;
-        options.MaxNumYAxisTicks      = 15;
-        options.LineStrokeWidth       = 1;
-        options.XAxisLines            = true;
+        _options.InterpolationOption   = InterpolationOption.Straight;
+        _options.YAxisTicks            = 100;
+        _options.YAxisLines            = true;
+        _options.YAxisRequireZeroPoint = true;
+        _options.MaxNumYAxisTicks      = 15;
+        _options.LineStrokeWidth       = 1;
+        _options.XAxisLines            = true;
     }
 
     private async Task OnSelectionChanged()
@@ -74,7 +71,7 @@
         _endDate  = _startDate;
         _averages = await Service.GetAverageHourlyApiResultAsync(_startDate, _endDate);
 
-        Series = new List<ChartSeries>()
+        _series = new List<ChartSeries>()
         {
             new() {Name = "CheckOrders", Data        = new double[24]},
             new() {Name = "CheckLogings", Data       = new double[24]},
@@ -85,15 +82,15 @@
         {
             if (rec.ApiName == "CheckOrders")
             {
-                Series[0].Data[rec.Hour] = rec.AverageValue;
+                _series[0].Data[rec.Hour] = rec.AverageValue;
             }
             if (rec.ApiName == "CheckLogins")
             {
-                Series[1].Data[rec.Hour] = rec.AverageValue;
+                _series[1].Data[rec.Hour] = rec.AverageValue;
             }
             if (rec.ApiName == "CheckRegistrations")
             {
-                Series[2].Data[rec.Hour] = rec.AverageValue;
+                _series[2].Data[rec.Hour] = rec.AverageValue;
             }
         }
     }

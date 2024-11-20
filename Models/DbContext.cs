@@ -7,7 +7,7 @@ public class DbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbContext(DbContextOptions<DbContext> options) : base(options) { }
 
     // DbSets and other configurations
-    public virtual DbSet<Collectedapidatum> Collectedapidata { get; set; }
+    public virtual DbSet<CollectApiDatum> Collectedapidata { get; set; }
     public virtual DbSet<AdminFunction>     AdminFunctions   { get; set; }
     public virtual DbSet<AdminRole>         AdminRoles       { get; set; }
     public virtual DbSet<AdminUser>         AdminUsers       { get; set; }
@@ -16,7 +16,7 @@ public class DbContext : Microsoft.EntityFrameworkCore.DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Collectedapidatum>(
+        modelBuilder.Entity<CollectApiDatum>(
             entity =>
             {
                 entity.HasKey(e => e.Id);

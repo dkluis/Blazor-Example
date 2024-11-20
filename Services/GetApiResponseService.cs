@@ -3,10 +3,10 @@ using System.Net;
 
 namespace _4LL_Monitoring.Services;
 
-public class ApiService
+public class GetApiResponseService
 {
     private readonly HttpClient _httpClient;
-    public ApiService(HttpClient httpClient) { _httpClient = httpClient; }
+    public GetApiResponseService(HttpClient httpClient) { _httpClient = httpClient; }
 
     public async Task<(HttpStatusCode, long, string)> GetApiResultAsync(string apiUrl)
     {
@@ -24,7 +24,7 @@ public class ApiService
         }
         catch (Exception ex)
         {
-            return (HttpStatusCode.InternalServerError, 0, "An error occurred while fetching the API result");
+            return (HttpStatusCode.InternalServerError, 0, "An error occurred while fetching the API result " + ex.Message);
         }
     }
 }

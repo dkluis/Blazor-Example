@@ -12,8 +12,8 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();         
 builder.Services.AddDbContext<DbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("TycherosMonitoring"))); // Add MS SqlServer
 builder.Services.AddScoped<DbService>();                                                        // Register the database service
-builder.Services.AddHttpClient<ApiService>();                                                   // Register HTTP client
-builder.Services.AddHostedService<PeriodicApiService>();                                        // Register the background service
+builder.Services.AddHttpClient<GetApiResponseService>();                                                   // Register HTTP client
+builder.Services.AddHostedService<BackgroundCollectApiDatumService>();                                        // Register the background service
 
 var app = builder.Build();
 

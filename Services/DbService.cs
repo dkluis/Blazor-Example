@@ -13,7 +13,7 @@ public class DbService
 
     #region Collected Api Data
 
-    public async Task<List<Collectedapidatum>> GetAllCollectedData()
+    public async Task<List<CollectApiDatum>> GetAllCollectedData()
     {
         using var scope   = _scopeFactory.CreateScope();
         var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
@@ -22,7 +22,7 @@ public class DbService
             var response = await context.Collectedapidata.ToListAsync();
             if (response is null)
             {
-                return new List<Collectedapidatum>();
+                return new List<CollectApiDatum>();
             }
             return response!;
         }
@@ -43,7 +43,7 @@ public class DbService
         }
     }
 
-    public async Task<List<Collectedapidatum>> GetAllCollectedData(DateTime? startDate, DateTime? endDate)
+    public async Task<List<CollectApiDatum>> GetAllCollectedData(DateTime? startDate, DateTime? endDate)
     {
         if (startDate == null) { startDate = DateTime.UtcNow; }
         if (endDate   == null) { endDate   = DateTime.UtcNow; }
@@ -60,7 +60,7 @@ public class DbService
                                         .ToListAsync();
             if (response is null)
             {
-                return new List<Collectedapidatum>();
+                return new List<CollectApiDatum>();
             }
             return response!;
         }
@@ -133,7 +133,7 @@ public class DbService
         }
     }
 
-    public async Task AddColletedApiDataAsync(Collectedapidatum entity)
+    public async Task AddColletedApiDataAsync(CollectApiDatum entity)
     {
         try
         {
@@ -159,7 +159,7 @@ public class DbService
         }
     }
 
-    public async Task UpdateEntityAsync(Collectedapidatum entity)
+    public async Task UpdateEntityAsync(CollectApiDatum entity)
     {
         try
         {

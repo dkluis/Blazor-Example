@@ -2,20 +2,21 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using DbContext = _4LL_Monitoring.Models.DbContext;
 
 namespace _4LL_Monitoring.Services;
 
-public class TycherosMonitoringService
+public class DbService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    public TycherosMonitoringService(IServiceScopeFactory scopeFactory) { _scopeFactory = scopeFactory; }
+    public DbService(IServiceScopeFactory scopeFactory) { _scopeFactory = scopeFactory; }
 
-    #region CollectedApiDatum
+    #region Collected Api Data
 
     public async Task<List<Collectedapidatum>> GetAllCollectedData()
     {
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             var response = await context.Collectedapidata.ToListAsync();
@@ -51,7 +52,7 @@ public class TycherosMonitoringService
         endDate   = endDate.Value.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.999
 
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
 
         try
         {
@@ -97,7 +98,7 @@ public class TycherosMonitoringService
         startDate = startDate.Value.Date;                       // Sets time to 00:00:00.000
         endDate   = endDate.Value.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.999
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             var response = await context.Collectedapidata
@@ -137,7 +138,7 @@ public class TycherosMonitoringService
         try
         {
             using var scope   = _scopeFactory.CreateScope();
-            var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+            var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
             context.Collectedapidata.Add(entity);
             await context.SaveChangesAsync();
         }
@@ -163,7 +164,7 @@ public class TycherosMonitoringService
         try
         {
             using var scope   = _scopeFactory.CreateScope();
-            var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+            var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
             context.Entry(entity).State = EntityState.Modified;
             await context.SaveChangesAsync();
         }
@@ -189,7 +190,7 @@ public class TycherosMonitoringService
         startDate = startDate.Date;                       // Sets time to 00:00:00.000
         endDate   = endDate.Date.AddDays(1).AddTicks(-1); // Sets time to 23:59:59.999
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         var entity = await context.Collectedapidata.Where(cd => cd.Created <= endDate && cd.Created >= startDate)
                                   .ToListAsync();
         if (entity != null)
@@ -201,12 +202,14 @@ public class TycherosMonitoringService
 
     #endregion
 
+    #region Admin - User - App - Role
+
     #region AdminFunctions
 
     public async Task<List<AdminFunction>> GetAllAdminFunctions()
     {
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             var response = await context.AdminFunctions.ToListAsync();
@@ -236,7 +239,7 @@ public class TycherosMonitoringService
     public async Task AddAdminFunctions(string adminFunction)
     {
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             if (adminFunction == null)
@@ -271,7 +274,7 @@ public class TycherosMonitoringService
     public async Task DeleteAdminFunction(string adminFunctionId)
     {
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             if (string.IsNullOrWhiteSpace(adminFunctionId))
@@ -312,7 +315,7 @@ public class TycherosMonitoringService
     public async Task<List<AdminRole>> GetAllAdminRoles()
     {
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             var response = await context.AdminRoles.ToListAsync();
@@ -346,7 +349,7 @@ public class TycherosMonitoringService
     public async Task<List<AdminUser>> GetAllAdminUsers()
     {
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             var response = await context.AdminUsers.ToListAsync();
@@ -375,12 +378,12 @@ public class TycherosMonitoringService
 
     #endregion
 
-    #region AdminUsers
+    #region AdminApps
 
     public async Task<List<AdminApp>> GetAllAdminApps()
     {
         using var scope   = _scopeFactory.CreateScope();
-        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
         try
         {
             var response = await context.AdminApps.ToListAsync();
@@ -406,6 +409,42 @@ public class TycherosMonitoringService
             throw;
         }
     }
+
+    #endregion
+
+    #region AdminUserAppStates
+
+    public async Task<List<AdminUserAppState>> GetAllAdminUserAppStates()
+    {
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<DbContext>();
+        try
+        {
+            var response = await context.AdminUserAppStates.ToListAsync();
+            if (response is null)
+            {
+                return new List<AdminUserAppState>();
+            }
+            return response!;
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
+    }
+
+    #endregion
 
     #endregion
 }

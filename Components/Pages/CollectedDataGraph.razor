@@ -1,6 +1,6 @@
 ﻿@page "/CollectedDataGraph"
 
-@inject TycherosMonitoringService Service
+@inject DbService Service
 @using _4LL_Monitoring.Services
 
 
@@ -36,7 +36,7 @@
 
 
 @code {
-    private List<TycherosMonitoringService.AverageHourlyApiResult> _averages       = new();
+    private List<DbService.AverageHourlyApiResult> _averages       = new();
     private List<string>                                           apiNames        = new() {"CheckOrders", "CheckLogins", "CheckRegistrations"};
     private string                                                 selectedApiName = "CheckOrders";
     private List<string>                                           selectedListApiNames;

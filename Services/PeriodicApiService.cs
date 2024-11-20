@@ -38,7 +38,7 @@ public class PeriodicApiService : BackgroundService
                 ElapsedMilliseconds = elapsed,
             };
             using var scope = _serviceProvider.CreateScope();
-            var dbService = scope.ServiceProvider.GetRequiredService<TycherosMonitoringService>();
+            var dbService = scope.ServiceProvider.GetRequiredService<DbService>();
             await dbService.AddColletedApiDataAsync(orderRec);
 
             apiUrl = "https://uptimeapi.myapiserve.com/UptimeApi/CheckRegistrations";

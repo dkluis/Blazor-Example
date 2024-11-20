@@ -10,13 +10,19 @@ public class AdminUser
     [StringLength(30)]
     [Column(TypeName = "varchar")]
     public string UserID { get; set; } = default!;
+
     [StringLength(100)]
     [Column(TypeName = "varchar")]
     public string Password { get; set; } = default!;
+
     [StringLength(100)]
     [Column(TypeName = "varchar")]
     public string? Salt { get; set; }
+
     [Required]
     [Column(TypeName = "bit")]
     public bool Enabled { get; set; } = true; // Set the default value to 1 (true)
+
+    // Navigation property
+    public ICollection<AdminUserAppState> UserAppStates { get; set; } = new List<AdminUserAppState>();
 }

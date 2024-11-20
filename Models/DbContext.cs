@@ -2,9 +2,9 @@
 
 namespace _4LL_Monitoring.Models;
 
-public class TycherosmonitoringContext : DbContext
+public class DbContext : Microsoft.EntityFrameworkCore.DbContext
 {
-    public TycherosmonitoringContext(DbContextOptions<TycherosmonitoringContext> options) : base(options) { }
+    public DbContext(DbContextOptions<DbContext> options) : base(options) { }
 
     // DbSets and other configurations
     public virtual DbSet<Collectedapidatum> Collectedapidata { get; set; }
@@ -12,6 +12,7 @@ public class TycherosmonitoringContext : DbContext
     public virtual DbSet<AdminRole>         AdminRoles       { get; set; }
     public virtual DbSet<AdminUser>         AdminUsers       { get; set; }
     public virtual DbSet<AdminApp>          AdminApps        { get; set; }
+    public virtual DbSet<AdminUserAppState> AdminUserAppStates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,14 +35,38 @@ public class TycherosmonitoringContext : DbContext
             }
         );
 
-        modelBuilder.Entity<AdminFunction>().HasKey(f => f.FunctionID);
-        modelBuilder.Entity<AdminFunction>().HasIndex(f => f.FunctionID).IsUnique();
-        modelBuilder.Entity<AdminRole>().HasIndex(r => r.RoleID).IsUnique();
-        modelBuilder.Entity<AdminUser>().HasIndex(u => u.UserID).IsUnique();
+        // Ensure the unique constraint on AdminUser.UserID
+        modelBuilder.Entity<AdminUser>()
+                    .HasIndex(u => u.UserID)
+                    .IsUnique();
+
+        // Ensure the unique constraint on AdminApp.AppID
+        modelBuilder.Entity<AdminApp>()
+                    .HasIndex(a => a.AppID)
+                    .IsUnique();
+
+        // Configure the foreign key relationship between AdminApp and AdminFunction
         modelBuilder.Entity<AdminApp>()
                     .HasOne(a => a.Function)
                     .WithMany()
                     .HasForeignKey(a => a.FunctionID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+        // Ensure the composite unique constraint on AdminUserAppState (UserID, AppID)
+        modelBuilder.Entity<AdminUserAppState>()
+                    .HasKey(u => new { u.UserID, u.AppID });
+
+        // Configure the foreign key relationships for AdminUserAppState
+        modelBuilder.Entity<AdminUserAppState>()
+                    .HasOne(u => u.User)
+                    .WithMany(u => u.UserAppStates)
+                    .HasForeignKey(u => u.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<AdminUserAppState>()
+                    .HasOne(u => u.App)
+                    .WithMany(a => a.UserAppStates)
+                    .HasForeignKey(u => u.AppID)
                     .OnDelete(DeleteBehavior.Cascade);
     }
 }

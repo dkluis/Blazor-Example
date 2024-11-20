@@ -1,7 +1,7 @@
 ﻿@page "/ColletedTimeSeriesGraph"
 @using _4LL_Monitoring.Services
 @using MudBlazor.Components.Chart.Models
-@inject TycherosMonitoringService Service
+@inject DbService Service
 
 <MudPaper>
     <MudGrid Justify="Justify.Center" Spacing="6">
@@ -53,7 +53,7 @@
     private int                                                    _selectedApiIdx = 1;
     private List<string>                                           ApiList         = new() {"CheckOrders", "CheckLogins", "CheckRegistrations"};
     private string                                                 selectedAPI     = "CheckOrders";
-    private List<TycherosMonitoringService.AverageHourlyApiResult> _averages       = new();
+    private List<DbService.AverageHourlyApiResult> _averages       = new();
     private DateTime?                                              _startDate      = DateTime.UtcNow.Date;
     private DateTime?                                              _endDate        = DateTime.UtcNow.Date;
     private List<DateOnly>                                         _days           = new();
@@ -80,7 +80,7 @@
     {
         await OnSelectionChanged();
         // For Testing EF Stuff
-        // var result = await Service.GetAllAdminApps();
+        //var result = await Service.GetAllAdminUserAppStates();
     }
 
     private async Task OnSelectionChanged()

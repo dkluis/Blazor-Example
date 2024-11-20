@@ -10,14 +10,19 @@ public class AdminApp
     [StringLength(30)]
     [Column(TypeName = "varchar")]
     public string AppID { get; set; } = default!;
+
     [StringLength(30)]
     [Column(TypeName = "varchar")]
     public string? FunctionID { get; set; }
+
     [Required]
     [Column(TypeName = "bit")]
     public bool ReportApp { get; set; } = true; // Set the default value to 1 (true)
 
-    // Navigation property to AdminFunction
+    // Navigation property
     [ForeignKey("FunctionID")]
     public AdminFunction? Function { get; set; }
+
+    // Navigation property
+    public ICollection<AdminUserAppState> UserAppStates { get; set; } = new List<AdminUserAppState>();
 }

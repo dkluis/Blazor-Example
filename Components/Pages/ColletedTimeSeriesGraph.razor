@@ -45,7 +45,7 @@
     </MudGrid>
 </MudPaper>
 
-<MudTimeSeriesChart XAxisTitle="24 Hours" ChartSeries="@_series" @bind-SelectedIndex="Index" Width="100%" Height="750px" ChartOptions="@_options" CanHideSeries TimeLabelSpacing="TimeSpan.FromHours(24)" TimeLabelFormat="HH"/>
+<MudTimeSeriesChart XAxisTitle="24 Hours" ChartSeries="@_series" @bind-SelectedIndex="_index" Width="100%" Height="750px" ChartOptions="@_options" CanHideSeries TimeLabelSpacing="TimeSpan.FromHours(1)" TimeLabelFormat="HH"/>
 
 
 @code
@@ -64,7 +64,7 @@
         await OnInitializedAsync();
     }
 
-    private int                         Index   = -1; //default value cannot be 0 -> first selectedindex is 0.
+    private int                         _index   = -1; //default value cannot be 0 -> first selectedindex is 0.
     private List<TimeSeriesChartSeries> _series = new();
     private ChartOptions _options = new()
     {
@@ -72,7 +72,7 @@
         YAxisTicks            = 25,
         MaxNumYAxisTicks      = 25,
         YAxisRequireZeroPoint = false,
-        XAxisLines            = true,
+        XAxisLines            = false,
         LineStrokeWidth       = 1,
     };
     protected override async Task OnInitializedAsync() { await OnSelectionChanged(); }

@@ -75,7 +75,13 @@
         XAxisLines            = false,
         LineStrokeWidth       = 1,
     };
-    protected override async Task OnInitializedAsync() { await OnSelectionChanged(); }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await OnSelectionChanged();
+        // For Testing EF Stuff
+        // var result = await Service.GetAllAdminApps();
+    }
 
     private async Task OnSelectionChanged()
     {

@@ -306,4 +306,106 @@ public class TycherosMonitoringService
     }
 
     #endregion
+
+    #region AdminRoles
+
+    public async Task<List<AdminRole>> GetAllAdminRoles()
+    {
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            var response = await context.AdminRoles.ToListAsync();
+            if (response is null)
+            {
+                return new List<AdminRole>();
+            }
+            return response!;
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region AdminUsers
+
+    public async Task<List<AdminUser>> GetAllAdminUsers()
+    {
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            var response = await context.AdminUsers.ToListAsync();
+            if (response is null)
+            {
+                return new List<AdminUser>();
+            }
+            return response!;
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region AdminUsers
+
+    public async Task<List<AdminApp>> GetAllAdminApps()
+    {
+        using var scope   = _scopeFactory.CreateScope();
+        var       context = scope.ServiceProvider.GetRequiredService<TycherosmonitoringContext>();
+        try
+        {
+            var response = await context.AdminApps.ToListAsync();
+            if (response is null)
+            {
+                return new List<AdminApp>();
+            }
+            return response!;
+        }
+        catch (SqlException e)
+        {
+            Console.WriteLine($"Number: {e.Number}, Message: {e.Message}");
+            throw;
+        }
+        catch (DbUpdateException e)
+        {
+            Console.WriteLine($"Update Exception: {e.Message}");
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception: {e.Message}");
+            throw;
+        }
+    }
+
+    #endregion
 }

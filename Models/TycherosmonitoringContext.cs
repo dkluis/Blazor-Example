@@ -9,6 +9,9 @@ public class TycherosmonitoringContext : DbContext
     // DbSets and other configurations
     public virtual DbSet<Collectedapidatum> Collectedapidata { get; set; }
     public virtual DbSet<AdminFunction>     AdminFunctions   { get; set; }
+    public virtual DbSet<AdminRole>         AdminRoles       { get; set; }
+    public virtual DbSet<AdminUser>         AdminUsers       { get; set; }
+    public virtual DbSet<AdminApp>          AdminApps        { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,5 +36,12 @@ public class TycherosmonitoringContext : DbContext
 
         modelBuilder.Entity<AdminFunction>().HasKey(f => f.FunctionID);
         modelBuilder.Entity<AdminFunction>().HasIndex(f => f.FunctionID).IsUnique();
+        modelBuilder.Entity<AdminRole>().HasIndex(r => r.RoleID).IsUnique();
+        modelBuilder.Entity<AdminUser>().HasIndex(u => u.UserID).IsUnique();
+        modelBuilder.Entity<AdminApp>()
+                    .HasOne(a => a.Function)
+                    .WithMany()
+                    .HasForeignKey(a => a.FunctionID)
+                    .OnDelete(DeleteBehavior.Cascade);
     }
 }
